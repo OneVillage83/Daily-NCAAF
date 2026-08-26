@@ -22,6 +22,23 @@ The project is being designed as a full production architecture from the beginni
 - Keep cross-sport infrastructure in `Daily-Data-Core` and college-football-native intelligence in `Daily-NCAAF`.
 - Do not prematurely extract shared NFL/NCAAF code. Build both implementations first, then extract abstractions only where semantics are demonstrably shared.
 
+## Current phase
+
+**Phase B — Source & Coverage Audit** is active.
+
+- **B.1 — Public Source & Contract Audit:** complete.
+- **B.2 — Empirical Coverage & PIT Probe:** active.
+- The public SportsDataverse/cfbfastR measurement pass, probe specification, research harness, tests and secret/output guardrails are now implemented.
+- Authenticated CFBD row-level probes, cross-provider reconciliation cases and prospective 2026 live revision measurements remain before Phase C.
+
+Current references:
+
+- [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
+- [`docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md`](./docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V2.md`](./docs/data/PROVIDER_PROBE_RESULTS_V2.md)
+
+Phase C canonical-schema implementation remains intentionally blocked until B.2 has enough empirical evidence to design provider-independent contracts.
+
 ## Architecture
 
 The governing architecture lives in [`docs/architecture`](./docs/architecture) and is organized as F-0 through F-24 across six layers:
