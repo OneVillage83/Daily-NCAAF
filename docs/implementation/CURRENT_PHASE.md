@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. Phase B.2 empirical coverage/PIT probe is active, with the public SportsDataverse/cfbfastR measurement pass and reproducible probe harness now implemented. Phase C remains intentionally blocked pending authenticated CFBD and cross-provider evidence.
+**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. Phase B.2 empirical coverage/PIT probe is active. The public SportsDataverse/cfbfastR measurement pass and the first authenticated CFBD games/PBP row-level pass are complete. A narrow B.2-A follow-up is active before B.2-B college-native family expansion. Phase C remains intentionally blocked pending sufficient provider-family and cross-provider evidence.
 
 ---
 
@@ -33,20 +33,20 @@ Governing Phase B documents:
 
 ## B.2 — Empirical Coverage & PIT Probe — ACTIVE
 
-### B.2 public measurement pass — COMPLETE
-
-Current evidence is recorded in:
+Current evidence:
 
 - `docs/data/PROVIDER_PROBE_RESULTS_V1.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V2.md`
+- `docs/data/PROVIDER_PROBE_RESULTS_V3.md`
 - `docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md`
+- `docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md`
 
 Research-only tooling:
 
 - `scripts/probes/provider_coverage_probe.py`
 - `tests/probes/test_provider_coverage_probe.py`
 
-### Public empirical anchors now measured
+### Public empirical anchors
 
 #### 2024 completed-season cfbfastR build
 
@@ -62,7 +62,7 @@ The public build log reports:
 0 injury rows from 966 games
 ```
 
-This verifies a major availability conclusion:
+Locked consequence:
 
 ```text
 NO INJURY ROW != HEALTHY
@@ -72,20 +72,7 @@ The ESPN-derived public injury block cannot be treated as national college-footb
 
 #### 2026 preseason cfbfastR build
 
-The current public build reports:
-
-```text
-946 schedules
-946 betting rows
-1,776 power-index rows
-0 PBP rows
-0 game-roster rows
-0 injury rows
-```
-
-The same log explicitly says the season has not started for PBP-derived products.
-
-Therefore coverage state must distinguish at least:
+The public build reports schedules/betting before event products exist. Therefore coverage state must distinguish at least:
 
 ```text
 NOT_YET_APPLICABLE
@@ -97,73 +84,145 @@ AVAILABLE
 
 A zero-row preseason PBP dataset and a zero-row completed-season injury dataset are not semantically equivalent.
 
-#### Historical PBP release era
+#### Historical public PBP era
 
-Current SportsDataverse public release metadata verifies season-specific PBP artifacts from **2004 through 2025**.
-
-This establishes artifact existence, not yet guaranteed training-quality completeness.
-
-The current release artifacts were created/rebuilt long after many of the historical games, so:
-
-```text
-current historical artifact != historical knowledge snapshot
-```
-
-remains locked.
-
-### Leakage guardrail now executable
-
-The probe harness carries an explicit hazard list for verified cfbfastR next-play fields including:
-
-```text
-lead_text
-lead_start_team
-lead_start_yardsToEndzone
-lead_start_down
-lead_start_distance
-lead_scoringPlay
-```
-
-Provider tables may never be wholesale-approved as model features.
+Current SportsDataverse release metadata verifies season-specific PBP artifacts from 2004 through 2025. Artifact existence is not historical PIT proof.
 
 ---
 
-## B.2 next active work
+## B.2-A — CFBD authenticated representative row probe
 
-### B.2-A — CFBD authenticated representative row probe — NEXT / CREDENTIAL-GATED
+### Initial authenticated pass — COMPLETE
 
-The committed harness reads:
-
-```text
-CFBD_API_KEY
-```
-
-from the environment only.
-
-Initial probe targets:
+A local run of the committed V1 harness successfully queried:
 
 ```text
 GET /games
 GET /plays
 ```
 
-across representative seasons/weeks.
+for seasons:
 
-Measure:
+```text
+2004, 2010, 2014, 2020, 2024, 2025, 2026
+```
 
-- game and play counts;
-- unique and duplicate IDs;
-- neutral-site representation;
-- conference/classification missingness;
-- PBP game coverage;
-- `wallclock`, PPA and play-text missingness;
-- era/schema behavior.
+and representative weeks:
 
-Absence of a local key is recorded as `SKIPPED_NO_CFBD_API_KEY`, not provider failure.
+```text
+1, 8, 15
+```
 
-### B.2-B — CFBD college-native family expansion
+Every request returned HTTP 200.
 
-After the first authenticated games/PBP probe:
+### Key measured findings
+
+#### Game identity
+
+- zero duplicate game-ID rows in every sampled season response;
+- 2024 returned 920 rows / 920 unique IDs, with 919 marked complete;
+- 2025 returned 934 / 934, all complete;
+- 2026 returned 888 scheduled rows and zero completed rows at probe time;
+- 2004 contained four conference-null observations; later sampled seasons contained none.
+
+#### Play identity and text
+
+Across the sampled played seasons:
+
+- zero duplicate play-ID rows were observed;
+- play text was effectively complete, with only one null row in the sampled 2024 set.
+
+#### `wallclock` era break
+
+Aggregated sampled-week null rates:
+
+```text
+2004  100.00%
+2010  100.00%
+2014  100.00%
+2020    0.10%
+2024    2.32%
+2025    0.97%
+```
+
+Locked consequence:
+
+```text
+CFBD wallclock is optional by era
+CFBD wallclock is not a universal historical publication timestamp
+```
+
+Daily-NCAAF live/PIT evidence must preserve its own `acquired_at` and immutable observation history.
+
+#### PPA nullness
+
+Aggregate PPA null rates across sampled played eras were roughly 22%-29%. Because these totals include administrative and special-teams play types where PPA may be structurally inapplicable, raw PPA nullness is not a generic PBP-completeness metric.
+
+The V2 probe now measures PPA nullness by play type.
+
+#### Cross-provider season universe mismatch
+
+Earlier cfbfastR public build counts:
+
+```text
+2024 schedules = 966
+2026 schedules = 946
+```
+
+CFBD authenticated `classification=fbs` counts:
+
+```text
+2024 games = 920
+2026 games = 888
+```
+
+These differences are not labeled provider defects. Event universes must first be normalized for classification, cancellation/postponement, postseason and other inclusion semantics.
+
+Locked consequence:
+
+```text
+NEVER compare provider season totals without normalizing event universe
+```
+
+---
+
+## B.2-A focused follow-up — ACTIVE / NEXT LOCAL RUN
+
+The probe harness is now versioned as:
+
+```text
+DAILY_NCAAF_PHASE_B2_PROVIDER_COVERAGE_PROBE_V2
+```
+
+It adds:
+
+- game classification-pair counts;
+- classification null counts;
+- season-type counts;
+- incomplete-game examples;
+- score-missing/start-time-TBD counts;
+- explicit query-scope metadata;
+- normalized null rates;
+- PPA and wallclock nullness by play type.
+
+The next narrow run targets:
+
+```text
+2015, 2016, 2017, 2018, 2019, 2024, 2026
+```
+
+Goals:
+
+1. locate the `wallclock` transition between 2014 and 2020;
+2. identify the one incomplete 2024 row;
+3. measure FBS/FCS classification-pair composition behind the CFBD season universe;
+4. avoid carrying ambiguous provider-scope assumptions into B.2-C/Phase C.
+
+---
+
+## B.2-B — CFBD college-native family expansion — QUEUED NEXT
+
+After the focused B.2-A follow-up:
 
 - teams/conferences;
 - rosters/players;
@@ -174,7 +233,11 @@ After the first authenticated games/PBP probe:
 - lines;
 - ratings/rankings.
 
-### B.2-C — Cross-provider identity/reconciliation cases
+These will be probed family-by-family rather than by indiscriminate API download.
+
+---
+
+## B.2-C — Cross-provider identity/reconciliation cases
 
 Measure selected:
 
@@ -186,7 +249,11 @@ venue/conference agreement
 play matching where practical
 ```
 
-### B.2-D — Prospective live timestamp/revision capture
+The newly observed 2024/2026 season-universe deltas are explicit B.2-C targets rather than assumed completeness failures.
+
+---
+
+## B.2-D — Prospective live timestamp/revision capture
 
 Once 2026 games produce live events, capture repeated observations with:
 
@@ -200,7 +267,9 @@ correction time
 
 before assigning high-confidence live PIT semantics.
 
-### B.2-E — Availability-source trial
+---
+
+## B.2-E — Availability-source trial
 
 Because the public ESPN-derived 2024 injury build produced zero observations, evaluate:
 
@@ -216,7 +285,7 @@ against explicit questions about timestamped pre-kickoff status, historical revi
 
 ### Adopt / integrate as primary candidates
 
-- **CollegeFootballData (CFBD):** P0 college-native historical foundation and live candidate, pending B.2 authenticated measurements.
+- **CollegeFootballData (CFBD):** P0 college-native historical foundation and live candidate. Initial games/PBP empirical access is now verified; broader family/PIT evidence remains in Phase B.
 - **SportsDataverse / cfbfastR:** P0/P1 independent PBP/roster/participant reconstruction and research corpus.
 - **NCAA official sources:** rules/stat/result reference and reconciliation.
 - **College Football Playoff official sources:** postseason-format/competition truth.
@@ -238,8 +307,10 @@ against explicit questions about timestamped pre-kickoff status, historical revi
 4. complete redshirt/eligibility history;
 5. exact timestamped historical sportsbook quote tape in the sport repo — belongs in `Daily-Data-Core`;
 6. exact original publication/revision timing for several rich historical datasets;
-7. authenticated CFBD row-level era measurements;
-8. cross-provider player/game reconciliation rates.
+7. exact CFBD `wallclock` transition boundary and modern missingness semantics;
+8. normalized cross-provider game-universe reconciliation;
+9. cross-provider player/game reconciliation rates;
+10. broader authenticated CFBD roster/recruiting/transfer/coaching family measurements.
 
 These are architecture inputs, not reasons to fake completeness.
 
