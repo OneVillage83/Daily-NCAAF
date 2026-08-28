@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
 
 
@@ -9,6 +10,7 @@ MODULE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "probes" / "prov
 SPEC = importlib.util.spec_from_file_location("provider_coverage_probe", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 probe = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = probe
 SPEC.loader.exec_module(probe)
 
 
@@ -95,7 +97,7 @@ class ProviderCoverageProbeTests(unittest.TestCase):
         self.assertEqual(summary["away_conference_null_rows"], 2)
         self.assertEqual(summary["start_time_tbd_rows"], 2)
         self.assertEqual(summary["score_missing_rows"], 2)
-        self.assertIn(["fbs_vs_fcs", 2], summary["classification_pair_counts"])
+        self.assertIn(("fbs_vs_fcs", 2), summary["classification_pair_counts"])
         self.assertEqual(summary["incomplete_examples"][0]["notes"], "Canceled")
 
     def test_summarize_plays(self) -> None:
