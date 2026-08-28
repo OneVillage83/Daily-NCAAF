@@ -17,7 +17,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,7 +52,8 @@ GITHUB_RELEASE_BASE = (
     "https://api.github.com/repos/sportsdataverse/sportsdataverse-data/releases/tags/"
 )
 CFBD_BASE = "https://api.collegefootballdata.com"
-USER_AGENT = "Daily-NCAAF-Phase-B2-coverage-probe/1.0"
+USER_AGENT = "Daily-NCAAF-Phase-B2-coverage-probe/2.0"
+CONTRACT_VERSION = "DAILY_NCAAF_PHASE_B2_PROVIDER_COVERAGE_PROBE_V2"
 
 
 @dataclass(frozen=True)
@@ -177,20 +178,69 @@ def cfbd_get(path: str, params: dict[str, Any], key: str) -> HttpResult:
     return fetch_json(f"{CFBD_BASE}{path}?{query}", bearer=key)
 
 
+def _null_rate(null_rows: int, rows: int) -> float | None:
+    if rows == 0:
+        return None
+    return round(null_rows / rows, 6)
+
+
 def summarize_games(rows: list[dict[str, Any]]) -> dict[str, Any]:
     ids = [row.get("id") for row in rows if row.get("id") is not None]
     home_conf_null = sum(1 for row in rows if row.get("homeConference") is None)
     away_conf_null = sum(1 for row in rows if row.get("awayConference") is None)
+    home_class_null = sum(1 for row in rows if row.get("homeClassification") is None)
+    away_class_null = sum(1 for row in rows if row.get("awayClassification") is None)
     neutral = sum(1 for row in rows if bool(row.get("neutralSite")))
     completed = sum(1 for row in rows if bool(row.get("completed")))
+    start_time_tbd = sum(1 for row in rows if bool(row.get("startTimeTBD")))
+    score_missing = sum(
+        1
+        for row in rows
+        if row.get("homePoints") is None or row.get("awayPoints") is None
+    )
+    classification_pairs = Counter(
+        f"{row.get('homeClassification') or 'NULL'}_vs_{row.get('awayClassification') or 'NULL'}"
+        for row in rows
+    )
+    season_types = Counter(str(row.get("seasonType")) for row in rows if row.get("seasonType") is not None)
+    incomplete_examples = []
+    for row in rows:
+        if bool(row.get("completed")):
+            continue
+        incomplete_examples.append(
+            {
+                "id": row.get("id"),
+                "week": row.get("week"),
+                "season_type": row.get("seasonType"),
+                "start_date": row.get("startDate"),
+                "home_team": row.get("homeTeam"),
+                "away_team": row.get("awayTeam"),
+                "home_classification": row.get("homeClassification"),
+                "away_classification": row.get("awayClassification"),
+                "home_points": row.get("homePoints"),
+                "away_points": row.get("awayPoints"),
+                "notes": row.get("notes"),
+            }
+        )
+        if len(incomplete_examples) >= 10:
+            break
+
     return {
         "rows": len(rows),
         "unique_game_ids": len(set(ids)),
         "duplicate_game_id_rows": len(ids) - len(set(ids)),
         "completed_rows": completed,
+        "incomplete_rows": len(rows) - completed,
         "neutral_site_rows": neutral,
+        "start_time_tbd_rows": start_time_tbd,
+        "score_missing_rows": score_missing,
         "home_conference_null_rows": home_conf_null,
         "away_conference_null_rows": away_conf_null,
+        "home_classification_null_rows": home_class_null,
+        "away_classification_null_rows": away_class_null,
+        "classification_pair_counts": classification_pairs.most_common(),
+        "season_type_counts": season_types.most_common(),
+        "incomplete_examples": incomplete_examples,
     }
 
 
@@ -201,15 +251,52 @@ def summarize_plays(rows: list[dict[str, Any]]) -> dict[str, Any]:
     ppa_null = sum(1 for row in rows if row.get("ppa") is None)
     play_text_null = sum(1 for row in rows if row.get("playText") is None)
     play_types = Counter(str(row.get("playType")) for row in rows if row.get("playType") is not None)
+
+    ppa_by_type: dict[str, list[int]] = defaultdict(lambda: [0, 0])
+    wallclock_by_type: dict[str, list[int]] = defaultdict(lambda: [0, 0])
+    for row in rows:
+        play_type = str(row.get("playType")) if row.get("playType") is not None else "NULL"
+        ppa_by_type[play_type][0] += 1
+        wallclock_by_type[play_type][0] += 1
+        if row.get("ppa") is None:
+            ppa_by_type[play_type][1] += 1
+        if row.get("wallclock") is None:
+            wallclock_by_type[play_type][1] += 1
+
+    top_types = [name for name, _ in play_types.most_common(12)]
+    ppa_null_by_play_type = [
+        {
+            "play_type": name,
+            "rows": ppa_by_type[name][0],
+            "null_rows": ppa_by_type[name][1],
+            "null_rate": _null_rate(ppa_by_type[name][1], ppa_by_type[name][0]),
+        }
+        for name in top_types
+    ]
+    wallclock_null_by_play_type = [
+        {
+            "play_type": name,
+            "rows": wallclock_by_type[name][0],
+            "null_rows": wallclock_by_type[name][1],
+            "null_rate": _null_rate(wallclock_by_type[name][1], wallclock_by_type[name][0]),
+        }
+        for name in top_types
+    ]
+
     return {
         "rows": len(rows),
         "unique_game_ids": len(set(game_ids)),
         "unique_play_ids": len(set(play_ids)),
         "duplicate_play_id_rows": len(play_ids) - len(set(play_ids)),
         "wallclock_null_rows": wallclock_null,
+        "wallclock_null_rate": _null_rate(wallclock_null, len(rows)),
         "ppa_null_rows": ppa_null,
+        "ppa_null_rate": _null_rate(ppa_null, len(rows)),
         "play_text_null_rows": play_text_null,
+        "play_text_null_rate": _null_rate(play_text_null, len(rows)),
         "top_play_types": play_types.most_common(12),
+        "ppa_null_by_play_type": ppa_null_by_play_type,
+        "wallclock_null_by_play_type": wallclock_null_by_play_type,
     }
 
 
@@ -227,6 +314,11 @@ def cfbd_probe(seasons: list[int], weeks: list[int], key: str | None) -> dict[st
         "probe_type": "authenticated_read_only",
         "status": "RAN",
         "secret_policy": "key value intentionally omitted",
+        "query_scope": {
+            "games": {"seasonType": "both", "classification": "fbs"},
+            "plays": {"seasonType": "both", "classification": "fbs", "week": "selected"},
+            "warning": "provider query scope is not assumed equivalent to another provider's season universe",
+        },
         "seasons": {},
     }
 
@@ -268,7 +360,7 @@ def cfbd_probe(seasons: list[int], weeks: list[int], key: str | None) -> dict[st
 
 def build_report(mode: str, seasons: list[int], weeks: list[int]) -> dict[str, Any]:
     report: dict[str, Any] = {
-        "contract_version": "DAILY_NCAAF_PHASE_B2_PROVIDER_COVERAGE_PROBE_V1",
+        "contract_version": CONTRACT_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "research_only": True,
         "seasons": seasons,
