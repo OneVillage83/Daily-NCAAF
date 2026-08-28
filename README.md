@@ -28,14 +28,17 @@ The project is being designed as a full production architecture from the beginni
 
 - **B.1 — Public Source & Contract Audit:** complete.
 - **B.2 — Empirical Coverage & PIT Probe:** active.
-- The public SportsDataverse/cfbfastR measurement pass, probe specification, research harness, tests and secret/output guardrails are now implemented.
-- Authenticated CFBD row-level probes, cross-provider reconciliation cases and prospective 2026 live revision measurements remain before Phase C.
+- Public SportsDataverse/cfbfastR measurement is complete for the current audit pass.
+- The first authenticated CFBD `/games` + `/plays` representative row probe is complete across 2004, 2010, 2014, 2020, 2024, 2025 and 2026.
+- The authenticated pass observed unique sampled game/play IDs, near-complete play text, a major `wallclock` era break, and a CFBD↔cfbfastR season-universe mismatch that must be reconciled rather than guessed.
+- A V2 research probe now narrows the 2015–2019 `wallclock` transition and adds classification/incomplete-game diagnostics.
+- B.2-B college-native family expansion, B.2-C cross-provider reconciliation, B.2-D prospective live revision measurement and B.2-E availability-source trials remain before Phase C.
 
 Current references:
 
 - [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
-- [`docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md`](./docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V2.md`](./docs/data/PROVIDER_PROBE_RESULTS_V2.md)
+- [`docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md`](./docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V3.md`](./docs/data/PROVIDER_PROBE_RESULTS_V3.md)
 
 Phase C canonical-schema implementation remains intentionally blocked until B.2 has enough empirical evidence to design provider-independent contracts.
 
