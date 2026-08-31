@@ -1,32 +1,41 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. Phase B.2 empirical coverage/PIT probe remains active. B.2-A core authenticated CFBD games/PBP representative measurement is complete. B.2-B's first broad college-native family pass is also complete; a focused era/scope follow-up is active before B.2-C identity/reconciliation. Phase C remains intentionally blocked.
+**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. Phase B.2 empirical coverage/PIT work remains active. B.2-A core authenticated CFBD games/PBP measurement is complete. B.2-B broad college-native family discovery and the continuous 2015–2026 portal/talent/rating era scan are now complete; targeted entity-scope and identity cases are active. Phase C remains intentionally blocked.
 
 ---
 
-## Active phase
+## Phase B — Source & Coverage Audit
 
-### Phase B — Source & Coverage Audit
+### B.1 — Public Source & Contract Audit — COMPLETE
 
-#### B.1 — Public Source & Contract Audit — COMPLETE
+Completed artifacts include:
 
-Completed artifacts include provider registry, source coverage matrix, PIT availability matrix, identity rules, ruleset eras and Daily-Data-Core ownership boundaries.
+- provider registry;
+- source coverage matrix;
+- PIT availability matrix;
+- canonical identity rules;
+- ruleset eras;
+- Daily-Data-Core ownership boundaries.
 
 ---
 
 ## B.2 — Empirical Coverage & PIT Probe — ACTIVE
 
-Current evidence:
+Current evidence includes:
 
 - `docs/data/PROVIDER_PROBE_RESULTS_V1.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V2.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V3.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V4.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V5.md`
+- `docs/data/PROVIDER_PROBE_RESULTS_V6.md`
+- `docs/data/PROVIDER_PROBE_RESULTS_V7.md`
 - `docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md`
 - `docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md`
 - `docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md`
 - `docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V1.md`
+- `docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V2.md`
+- `docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md`
 
 Research-only tooling:
 
@@ -34,20 +43,22 @@ Research-only tooling:
 - `tests/probes/test_provider_coverage_probe.py`
 - `scripts/probes/cfbd_native_family_probe.py`
 - `tests/probes/test_cfbd_native_family_probe.py`
+- `scripts/probes/cfbd_talent_scope_probe.py`
+- `tests/probes/test_cfbd_talent_scope_probe.py`
 
 ---
 
 ## Public empirical anchors — LOCKED
 
-### SportsDataverse/cfbfastR
+### SportsDataverse / cfbfastR
 
-The completed 2024 public build demonstrated extensive schedule/PBP/participant/roster coverage but zero injury rows.
+The completed 2024 public build demonstrated extensive schedule/PBP/participant/roster coverage while producing zero injury rows.
 
 ```text
 NO INJURY ROW != HEALTHY
 ```
 
-Historical public PBP artifacts currently span 2004-2025, but modern artifact publication timestamps are not historical information-availability timestamps.
+Historical PBP artifacts currently span 2004–2025, but current artifact publication timestamps are not historical information-availability timestamps.
 
 Coverage states must distinguish:
 
@@ -63,24 +74,22 @@ AVAILABLE
 
 ## B.2-A — CFBD games/PBP representative audit — CORE COMPLETE
 
-The authenticated V1/V2 passes established enough event-side evidence to advance.
-
 Locked findings:
 
 1. no duplicate game IDs were observed in sampled season responses;
 2. no duplicate play IDs were observed in sampled weeks;
-3. play text was effectively complete in the measured strata;
+3. play text was effectively complete in measured strata;
 4. sampled `wallclock` is absent through 2017 and generally available-but-nullable from 2018 forward;
 5. `wallclock` is not a historical publication timestamp and never replaces Daily-NCAAF `acquired_at`;
-6. PPA nullness is strongly play-family dependent;
+6. PPA nullness is play-family dependent;
 7. `classification=fbs` returns an FBS-involved universe including FBS-vs-FCS games;
-8. the one incomplete 2024 game was Liberty at App State, a real Hurricane Helene cancellation;
-9. 2026 responses evolved between probe snapshots, proving the need for immutable current-season observations.
+8. the lone incomplete 2024 row was Liberty at App State, a real Hurricane Helene cancellation;
+9. 2026 provider responses changed between snapshots, proving the need for immutable current-season observations.
 
-Remaining event-side questions now belong to B.2-C/B.2-D:
+Remaining event-side questions move to B.2-C/B.2-D:
 
 - full-season cross-provider completeness;
-- CFBD↔cfbfastR game/play reconciliation;
+- CFBD ↔ cfbfastR game/play reconciliation;
 - player-play association completeness;
 - prospective live revision/publication timing.
 
@@ -88,16 +97,9 @@ Remaining event-side questions now belong to B.2-C/B.2-D:
 
 ## B.2-B — CFBD college-native family expansion
 
-### Initial broad pass — COMPLETE
+### Broad family pass — COMPLETE
 
-Local tests:
-
-```text
-Ran 8 tests in 0.001s
-OK
-```
-
-Authenticated representative seasons:
+Representative seasons:
 
 ```text
 2014
@@ -106,7 +108,7 @@ Authenticated representative seasons:
 2026
 ```
 
-Roster programs:
+Representative roster programs:
 
 ```text
 Alabama
@@ -131,59 +133,28 @@ Elo / SRS / SP+ / FPI / CORE
 historical lines
 ```
 
-Every family call in this pass returned HTTP 200.
-
-### B.2-B locked findings
-
-#### Teams
-
-FBS team IDs were unique and non-null in all representative seasons:
+The local native-family test suite reported:
 
 ```text
-2014 -> 128 / 128 unique
-2018 -> 130 / 130 unique
-2024 -> 134 / 134 unique
-2026 -> 138 / 138 unique
+Ran 8 tests
+OK
 ```
 
-Current role:
+### Core provider-family findings — LOCKED
 
-```text
-PRIMARY PROVIDER CROSSWALK CANDIDATE
-```
+#### Teams / conference affiliations
 
-Provider IDs remain crosswalks, not canonical internal IDs.
+CFBD FBS team IDs were unique/non-null in representative seasons and affiliation rows aligned strongly with the season-specific FBS program set.
 
-#### Historical conference affiliations
+Provider IDs remain crosswalks, not canonical Daily-NCAAF identities.
 
-The affiliation family matched the tested FBS team counts with no null team IDs or conferences. Historical `endYear` state is clearly retrospective/current provider truth and therefore useful for PIT-B reconstruction, not proof of historical publication timing.
+Historical conference state is useful for PIT-B reconstruction but is not proof of original publication timing.
 
-Canonical architecture remains:
+#### Rosters / recruiting
 
-```text
-SCHOOL -> PROGRAM -> PROGRAM_SEASON -> CONFERENCE_AFFILIATION_STINT
-```
+Roster athlete IDs were clean in the sampled programs, but direct recruiting linkage is incomplete.
 
-#### Rosters and recruit linkage
-
-Roster player IDs were unique/non-null in all sampled teams. Direct roster `recruitIds` linkage was incomplete and materially variable by era/program:
-
-```text
-sampled range ~= 33% to 86%
-```
-
-Modern physical/position fields were highly complete; older 2014 weight coverage was materially weaker.
-
-Locked rule:
-
-```text
-empty recruitIds -> unresolved linkage
-empty recruitIds != no recruiting record
-```
-
-#### Recruiting
-
-Recruit IDs were unique/non-null, but direct `athleteId` linkage rates were:
+Observed recruiting `athleteId` direct-link rates:
 
 ```text
 2014 -> 47.4%
@@ -192,9 +163,7 @@ Recruit IDs were unique/non-null, but direct `athleteId` linkage rates were:
 2026 -> 55.7%
 ```
 
-This proves that recruit→college-player identity cannot depend only on provider direct linkage.
-
-Required reconciliation states include at least:
+Required reconciliation states:
 
 ```text
 DIRECT_PROVIDER_LINK
@@ -206,144 +175,207 @@ REJECTED_MATCH
 
 No name-only auto-merge is permitted.
 
-#### Transfer portal
-
-Observed rows:
-
-```text
-2014 -> 0
-2018 -> 0
-2024 -> 3,378
-2026 -> 4,470
-```
-
-2024/2026 transfer dates were complete, but destinations and ratings were often missing. Missing destination is valid transfer-state information, not automatically bad data.
-
-Historical availability floor remains unresolved and is the first focused follow-up target.
-
 #### Returning production
 
-Rows were broad and returned PPA/usage fields were complete in the tested samples:
-
-```text
-2014 -> 125 teams
-2018 -> 130
-2024 -> 133
-2026 -> 136
-```
-
-This remains a derived provider feature family. It is useful for research/baselines but is not automatically historical PIT input.
+Coverage is broad, but this remains a provider-derived feature family whose historical PIT semantics are unresolved.
 
 #### Coaches
 
-Year-filtered coach IDs were unique and every returned row contained the queried year. However the first pass does not prove multi-season person/coach ID continuity or coordinator/play-caller history.
-
-#### Talent composite
-
-Observed rows:
-
-```text
-2014 -> 0
-2018 -> 236
-2024 -> 134
-2026 -> 138
-```
-
-The 2018 response is much broader than the measured 130-team FBS universe and cannot be normalized by assumption. Talent scope/era is explicitly unresolved.
-
-#### Ratings
-
-Observed counts:
-
-```text
-          Elo   SRS   SP+   FPI   CORE
-2014      130   128   129   128      0
-2018      131   130   131   130    130
-2024      134   265   135   134    134
-2026       16     0   139   138      0
-```
-
-Locked consequences:
-
-- rating families do not share one entity universe or readiness state;
-- CORE historical output is retrospective/PIT-C unless prospectively captured;
-- Elo year-only queries do not define an explicit week snapshot;
-- SRS can return a broader universe than FBS and needs overlap/division measurement;
-- SP+/FPI remain external model outputs requiring their own PIT/provenance contracts.
+Year-filtered coach IDs were unique in representative queries, but multi-season/team continuity still requires targeted case studies. Coordinator/play-caller history remains a separate source gap.
 
 #### Rankings
 
-Historical responses were rich; 2026 currently has only one early-season snapshot. Some historical responses contained more than one snapshot row labeled week `1`, so ranking identity cannot be keyed only by `(season, week)`.
+Historical poll data is rich, but some seasons return multiple rows labeled week `1`; ranking snapshots cannot be keyed only by `(season, week)`.
 
 #### Historical lines
 
-Week-1 coverage:
+CFBD historical line data has useful market evidence but variable field richness by era and no timestamped quote chronology.
 
-```text
-2014 -> 81 / 84 games
-2018 -> 84 / 88
-2024 -> 110 / 125
-2026 -> 144 / 144
-```
-
-Field richness changes substantially by era. Older responses have spread evidence but no opening fields or moneylines; modern responses contain partial opening/moneyline fields.
-
-The 2026 provider-name set contains both:
+Observed provider alias drift includes:
 
 ```text
 DraftKings
 Draft Kings
 ```
 
-which empirically locks sportsbook alias normalization into `Daily-Data-Core`.
+Therefore sportsbook identity/aliasing, quote `acquired_at`, no-vig and market chronology remain owned by `Daily-Data-Core`.
 
 ```text
 CFBD historical lines != timestamped sportsbook quote tape
 ```
 
-Daily-Data-Core remains authoritative for sportsbook identity, quote `acquired_at`, price chronology, no-vig and closing-snapshot policy.
+---
+
+## Continuous portal/talent/rating era scan — COMPLETE
+
+The annual 2015–2026 scan plus clean 2025 retry resolves the broad-era questions sufficiently to stop indiscriminate endpoint harvesting.
+
+### Transfer portal
+
+Observed annual row counts:
+
+```text
+2015      0
+2016      0
+2017      0
+2018      0
+2019      0
+2020      0
+2021   1770
+2022   2273
+2023   2502
+2024   3378
+2025   4499
+2026   4470  (prior representative snapshot)
+```
+
+Locked provider coverage boundary:
+
+```text
+PRE_2021 -> no portal rows in tested annual queries
+2021_PLUS -> substantial portal coverage
+```
+
+This is an API/source boundary, not a historical publication timestamp.
+
+2025 portal missingness:
+
+```text
+destination null 729 / 4499  ~= 16.2%
+rating null      1988 / 4499 ~= 44.2%
+stars null        686 / 4499 ~= 15.2%
+transferDate null   0 / 4499 =   0.0%
+```
+
+Missing destination/rating remains valid uncertainty/state information, not automatically bad data.
+
+### Talent composite
+
+Observed unique-team counts:
+
+```text
+2015 232
+2016 237
+2017 157
+2018 236
+2019 231
+2020 219
+2021 224
+2022 233
+2023 238
+2024 134
+2025 134
+2026 138  (prior representative snapshot)
+```
+
+This disproves any universal assumption that `/talent` is FBS-only historically.
+
+The 2025 response also prevents locking a simple `2024+ == FBS membership` rule: 2025 talent returned 134 teams while FBS-sized rating families returned 136.
+
+Therefore row-count inference ends here. Exact team-set membership comparison is now required.
+
+### Rating-family boundaries
+
+#### CORE
+
+Public retrospective rows begin in 2016.
+
+```text
+CORE historical public output = PIT-C by default
+```
+
+#### Elo
+
+Year-only queries represent latest-available-week behavior, not a canonical explicit weekly snapshot.
+
+#### FPI
+
+Completed-season counts closely track the FBS-sized universe and make FPI a strong external benchmark/source candidate, while PIT provenance remains separate.
+
+#### SP+
+
+Repeatedly returns approximately the FBS-sized universe plus one extra/null-conference row; entity reconciliation is required.
+
+#### SRS
+
+Observed counts include:
+
+```text
+2021 130
+2022 261
+2023 261
+2024 265 rows / 263 unique teams
+2025 266 rows / 265 unique teams
+```
+
+SRS therefore cannot be treated as FBS-only or normalized by row count.
+
+### Transport/rate semantics
+
+The long era scan triggered temporary HTTP 429 responses. Provider output explicitly identified these as short-period rate limiting rather than exhausted monthly quota.
+
+Locked rule:
+
+```text
+HTTP 429 != missing dataset
+HTTP 429 != empty coverage
+HTTP 429 != monthly quota exhausted
+```
+
+Targeted follow-up tooling should pace requests and use bounded retry/backoff.
 
 ---
 
-## B.2-B focused follow-up — ACTIVE / NEXT
+## B.2-B targeted scope & identity cases — ACTIVE / NEXT
 
-Plan:
-
-```text
-docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V1.md
-```
-
-### Follow-up A — portal/talent/rating era scan
-
-Use the existing B.2-B harness over:
+Governing plan:
 
 ```text
-2015-2026
-families = portal,talent,ratings
+docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md
 ```
 
-Goals:
+### Target 1 — talent membership scope
 
-1. locate the first non-zero transfer-portal season;
-2. locate talent availability/scope transitions;
-3. map annual CORE/Elo/SRS/SP+/FPI readiness;
-4. identify years where rating/talent universes materially exceed FBS scope;
-5. separate current-season structural zeros from historical unavailability.
+Use:
 
-### Follow-up B — identity cases
+```text
+scripts/probes/cfbd_talent_scope_probe.py
+```
 
-After era boundaries are located, measure representative actual identities:
+for:
+
+```text
+2023
+2024
+2025
+2026
+```
+
+Compare exact provider membership from:
+
+```text
+/teams/fbs?year=<season>
+/talent?year=<season>
+```
+
+Measure exact overlap plus missing/extra team sets. Do not fuzzy-normalize away provider-name mismatches.
+
+### Target 2 — player identity cases
+
+Required bounded cases:
 
 - same-program multi-season player;
-- transfer player;
-- multiple-transfer player;
-- direct recruit `athleteId` link;
-- recruit without direct `athleteId` but later roster presence;
+- single transfer;
+- multiple transfers;
+- recruit with direct `athleteId`;
+- recruit without direct `athleteId` but later roster evidence;
+- FBS/FCS mover;
 - similar-name collision;
-- position/jersey change;
-- coach continuity across seasons/teams.
+- jersey/position change.
 
-This work will feed B.2-C rather than creating premature canonical tables.
+### Target 3 — coach continuity
+
+Measure provider coach-ID continuity across seasons and team changes, including an interim transition where possible.
 
 ---
 
@@ -358,6 +390,8 @@ transfer continuity
 venue/conference agreement
 play matching where practical
 ```
+
+The targeted B.2-B identity cases should feed directly into B.2-C.
 
 ---
 
@@ -379,7 +413,13 @@ before assigning high-confidence live PIT semantics.
 
 ## B.2-E — Availability-source trial — QUEUED
 
-Because the public ESPN-derived injury family produced zero observations across a completed 2024 build, evaluate official conference/program feeds plus SportsDataIO/Sportradar trials against explicit timestamp, revision, identity, latency and missing-report criteria.
+Because the public ESPN-derived injury family produced zero observations across a completed 2024 build, evaluate:
+
+- official conference/program availability feeds;
+- SportsDataIO trial;
+- Sportradar trial;
+
+against timestamp, revision, identity, latency and missing-report criteria.
 
 ---
 
@@ -394,4 +434,4 @@ Phase B closes only when:
 5. remaining gaps are precise enough for provider-independent canonical contracts;
 6. no production schema depends on assuming a provider field is complete or PIT-safe without evidence.
 
-Production canonical schema, broad backfill, feature engineering, training, simulation and Recommendation Gate implementation remain intentionally blocked until that gate is met.
+Production canonical schema, broad backfill, feature engineering, training, simulation and Recommendation Gate implementation remain intentionally blocked until this gate is met.
