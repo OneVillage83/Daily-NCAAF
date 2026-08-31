@@ -29,16 +29,25 @@ The project is being designed as a full production architecture from the beginni
 - **B.1 — Public Source & Contract Audit:** complete.
 - **B.2 — Empirical Coverage & PIT Probe:** active.
 - Public SportsDataverse/cfbfastR measurement is complete for the current audit pass.
-- The first authenticated CFBD `/games` + `/plays` representative row probe is complete across 2004, 2010, 2014, 2020, 2024, 2025 and 2026.
-- The authenticated pass observed unique sampled game/play IDs, near-complete play text, a major `wallclock` era break, and a CFBD↔cfbfastR season-universe mismatch that must be reconciled rather than guessed.
-- A V2 research probe now narrows the 2015–2019 `wallclock` transition and adds classification/incomplete-game diagnostics.
-- B.2-B college-native family expansion, B.2-C cross-provider reconciliation, B.2-D prospective live revision measurement and B.2-E availability-source trials remain before Phase C.
+- **B.2-A core authenticated CFBD `/games` + `/plays` representative measurement is complete.**
+- The focused follow-up empirically located the sampled `wallclock` coverage break between 2017 and 2018.
+- The lone incomplete 2024 CFBD FBS-involved game is Liberty at App State, a real Hurricane Helene cancellation rather than an unexplained missing final.
+- `classification=fbs` empirically returns an FBS-involved game universe, including FBS-vs-FCS contests; cross-provider season totals must therefore be normalized before comparison.
+- PPA nullness is strongly play-family dependent and cannot be treated as a generic bad-play flag.
+- **B.2-B CFBD college-native family expansion is now active** with a bounded research harness for teams/conference affiliations, rosters, recruiting, transfer portal, returning production, coaches, talent, rankings, ratings and historical lines.
+- B.2-C cross-provider reconciliation, B.2-D prospective live revision measurement and B.2-E availability-source trials remain before Phase C.
 
 Current references:
 
 - [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
 - [`docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md`](./docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V3.md`](./docs/data/PROVIDER_PROBE_RESULTS_V3.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V4.md`](./docs/data/PROVIDER_PROBE_RESULTS_V4.md)
+- [`docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md`](./docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md)
+
+Research-only probe tooling:
+
+- [`scripts/probes/provider_coverage_probe.py`](./scripts/probes/provider_coverage_probe.py)
+- [`scripts/probes/cfbd_native_family_probe.py`](./scripts/probes/cfbd_native_family_probe.py)
 
 Phase C canonical-schema implementation remains intentionally blocked until B.2 has enough empirical evidence to design provider-independent contracts.
 
