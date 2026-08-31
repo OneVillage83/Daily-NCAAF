@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. Phase B.2 empirical coverage/PIT work remains active. B.2-A core authenticated CFBD games/PBP measurement is complete. B.2-B broad college-native family discovery and the continuous 2015–2026 portal/talent/rating era scan are now complete; targeted entity-scope and identity cases are active. Phase C remains intentionally blocked.
+**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. Phase B.2 empirical coverage/PIT work remains active. B.2-A core authenticated CFBD games/PBP measurement is complete. B.2-B broad college-native family discovery, the continuous 2015–2026 portal/talent/rating era scan, and the 2023–2026 Team Talent Composite membership audit are complete. Targeted player/transfer/coach identity cases are now active. Phase C remains intentionally blocked.
 
 ---
 
@@ -30,12 +30,14 @@ Current evidence includes:
 - `docs/data/PROVIDER_PROBE_RESULTS_V5.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V6.md`
 - `docs/data/PROVIDER_PROBE_RESULTS_V7.md`
+- `docs/data/PROVIDER_PROBE_RESULTS_V8.md`
 - `docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V1.md`
 - `docs/data/PROVIDER_COVERAGE_PROBE_SPEC_V2.md`
 - `docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md`
 - `docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V1.md`
 - `docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V2.md`
 - `docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md`
+- `docs/data/CFBD_IDENTITY_CASE_PROBE_SPEC_V1.md`
 
 Research-only tooling:
 
@@ -45,6 +47,8 @@ Research-only tooling:
 - `tests/probes/test_cfbd_native_family_probe.py`
 - `scripts/probes/cfbd_talent_scope_probe.py`
 - `tests/probes/test_cfbd_talent_scope_probe.py`
+- `scripts/probes/cfbd_identity_case_probe.py`
+- `tests/probes/test_cfbd_identity_case_probe.py`
 
 ---
 
@@ -226,7 +230,7 @@ Observed annual row counts:
 2023   2502
 2024   3378
 2025   4499
-2026   4470  (prior representative snapshot)
+2026   4470  (prior representative current-state snapshot)
 ```
 
 Locked provider coverage boundary:
@@ -236,7 +240,7 @@ PRE_2021 -> no portal rows in tested annual queries
 2021_PLUS -> substantial portal coverage
 ```
 
-This is an API/source boundary, not a historical publication timestamp.
+This is an API/source boundary, not a historical publication timestamp. Current-season counts are observations at their own acquisition times and must not be treated as final-season trend values.
 
 2025 portal missingness:
 
@@ -248,31 +252,6 @@ transferDate null   0 / 4499 =   0.0%
 ```
 
 Missing destination/rating remains valid uncertainty/state information, not automatically bad data.
-
-### Talent composite
-
-Observed unique-team counts:
-
-```text
-2015 232
-2016 237
-2017 157
-2018 236
-2019 231
-2020 219
-2021 224
-2022 233
-2023 238
-2024 134
-2025 134
-2026 138  (prior representative snapshot)
-```
-
-This disproves any universal assumption that `/talent` is FBS-only historically.
-
-The 2025 response also prevents locking a simple `2024+ == FBS membership` rule: 2025 talent returned 134 teams while FBS-sized rating families returned 136.
-
-Therefore row-count inference ends here. Exact team-set membership comparison is now required.
 
 ### Rating-family boundaries
 
@@ -322,60 +301,131 @@ HTTP 429 != empty coverage
 HTTP 429 != monthly quota exhausted
 ```
 
-Targeted follow-up tooling should pace requests and use bounded retry/backoff.
+Targeted follow-up tooling must pace requests and use bounded retry/backoff.
 
 ---
 
-## B.2-B targeted scope & identity cases — ACTIVE / NEXT
+## Team Talent Composite exact membership audit — COMPLETE
 
-Governing plan:
+The local talent-scope test suite reported:
+
+```text
+Ran 6 tests in 0.001s
+OK
+```
+
+All membership requests returned HTTP 200 on the first attempt.
+
+Exact provider-name membership results:
+
+| Season | FBS | Talent | Exact overlap | FBS missing from talent | Talent outside FBS | Exact match |
+|---:|---:|---:|---:|---:|---:|:---:|
+| 2023 | 133 | 238 | 133 | 0 | 105 | No |
+| 2024 | 134 | 134 | 134 | 0 | 0 | Yes |
+| 2025 | 136 | 134 | 134 | 2 | 0 | No |
+| 2026 | 138 | 138 | 138 | 0 | 0 | Yes |
+
+### 2023
+
+Every FBS program is present, plus 105 programs outside the FBS list. The extras include many recognizable FCS programs such as Delaware, Idaho, Jackson State, Montana, North Dakota State, Sacramento State, South Dakota State and Villanova.
+
+Locked rule:
+
+```text
+2023 /talent != FBS-only
+```
+
+### 2024
+
+The observed Team Talent Composite membership is an exact 134-for-134 match with the season-specific FBS list.
+
+### 2025
+
+The response is an FBS subset with no outside-FBS extras. The two FBS programs missing from the Team Talent Composite response are exactly:
+
+```text
+Air Force
+Navy
+```
+
+Locked rules:
+
+```text
+NO TALENT ROW != ZERO TALENT
+NO TALENT ROW != NON-FBS
+```
+
+The absence must be represented as provider-family missingness, not numeric zero.
+
+### 2026
+
+The observed Team Talent Composite membership again exactly matches the 138-team FBS list. Therefore the 2025 Air Force/Navy omission is a season/snapshot-specific coverage fact, not a permanent provider exclusion rule.
+
+### Canonical consequence
+
+Team Talent Composite rows must be reconciled against canonical `PROGRAM_SEASON` membership and retain explicit coverage state. Do not infer classification or completeness from row count or row presence alone.
+
+---
+
+## B.2-B targeted player/transfer/coach identity cases — ACTIVE / NEXT
+
+Specifications/plans:
 
 ```text
 docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md
+docs/data/CFBD_IDENTITY_CASE_PROBE_SPEC_V1.md
 ```
 
-### Target 1 — talent membership scope
-
-Use:
+Harness:
 
 ```text
-scripts/probes/cfbd_talent_scope_probe.py
+scripts/probes/cfbd_identity_case_probe.py
 ```
 
-for:
+Tests:
 
 ```text
-2023
-2024
-2025
-2026
+tests/probes/test_cfbd_identity_case_probe.py
 ```
 
-Compare exact provider membership from:
+### Player cases
 
 ```text
-/teams/fbs?year=<season>
-/talent?year=<season>
+Jalen Milroe   -> same-program continuity, Alabama 2021-2024
+Dillon Gabriel -> UCF 2019-2021 -> Oklahoma 2022-2023 -> Oregon 2024
+Travis Hunter  -> Jackson State 2022 -> Colorado 2023-2024, FCS -> FBS
+Caleb Downs    -> Alabama 2023 -> Ohio State 2024-2025
 ```
 
-Measure exact overlap plus missing/extra team sets. Do not fuzzy-normalize away provider-name mismatches.
+The probe measures `/player/search`, specified roster observations, recruiting linkage, and specified portal seasons while treating normalized-name matches only as candidate discovery.
 
-### Target 2 — player identity cases
+```text
+NAME MATCH != CANONICAL IDENTITY MATCH
+```
 
-Required bounded cases:
+Strong evidence includes stable explicit provider athlete IDs across roster stints and direct recruiting `athleteId` equality. Portal/name/context fields remain contextual unless an explicit identifier is present.
 
-- same-program multi-season player;
-- single transfer;
-- multiple transfers;
-- recruit with direct `athleteId`;
-- recruit without direct `athleteId` but later roster evidence;
-- FBS/FCS mover;
-- similar-name collision;
-- jersey/position change.
+### Coach cases
 
-### Target 3 — coach continuity
+```text
+Nick Saban
+Kalen DeBoer
+Curt Cignetti
+```
 
-Measure provider coach-ID continuity across seasons and team changes, including an interim transition where possible.
+Measure coach provider-ID continuity across nested seasons and team changes. This does not solve the separate coordinator/play-caller historical gap.
+
+### Identity probe reliability
+
+The harness includes:
+
+- API key read only from local environment;
+- no secret output;
+- request pacing;
+- bounded HTTP 429 backoff;
+- in-memory request caching;
+- schema-key surfacing for candidate rows;
+- no automatic canonical identity writes.
 
 ---
 
