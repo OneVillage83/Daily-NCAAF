@@ -30,12 +30,12 @@ The project is being designed as a full production architecture from the beginni
 - **B.2-A — CFBD games/PBP representative audit:** core complete.
 - Public SportsDataverse/cfbfastR measurement is complete for the current audit pass.
 - The authenticated CFBD event audit located the sampled `wallclock` coverage break between 2017 and 2018, proved that `classification=fbs` includes FBS-vs-FCS games, resolved the 2024 Liberty–App State incomplete row as a real cancellation, and showed that PPA nullness is play-family dependent.
-- **B.2-B — CFBD college-native family expansion:** broad family pass complete; continuous era scan substantially complete; 2025 retry plus targeted scope/identity cases next.
-- The first B.2-B run measured teams/conference affiliations, rosters, recruiting, transfer portal, returning production, coaches, talent, rankings, ratings and historical lines across 2014/2018/2024/2026.
-- The continuous 2015–2026 follow-up established an observed CFBD transfer-portal coverage floor at **2021**: annual queries returned zero rows through 2020 and substantial coverage from 2021 onward.
-- The talent-composite endpoint returns a much broader-than-FBS historical universe through 2023, then matches the measured FBS count in 2024; 2025 is the remaining year needed to locate that scope transition precisely.
+- **B.2-B — CFBD college-native family expansion:** broad family discovery and continuous 2015–2026 portal/talent/rating era scanning are complete. Targeted entity-scope and identity cases are now active.
+- The observed CFBD transfer-portal coverage floor is **2021**: annual queries returned zero rows through 2020 and substantial coverage from 2021 onward.
+- The clean 2025 retry returned 4,499 portal rows with complete `transferDate` but material destination/rating missingness.
+- Talent-composite responses have changing entity scope: they are much broader than FBS through 2023, equal the measured 2024 FBS row count, and return only 134 teams in 2025 while FBS-sized rating families return 136. Direct membership comparison is therefore required instead of row-count inference.
 - CORE public retrospective coverage begins in 2016. Elo, SRS, SP+, FPI and CORE retain distinct entity-universe and temporal contracts; SRS expands well beyond the FBS count beginning in the observed 2022 response.
-- The long era scan triggered temporary HTTP 429 burst-rate responses. These are transport states, not evidence of missing datasets or exhausted monthly quota, and must never be collapsed into data-coverage classifications.
+- Temporary HTTP 429 responses are transport states, not missing-data states. Targeted probes now use bounded request pacing/retry behavior where appropriate.
 - Direct recruiting↔college-player linkage is useful but incomplete; provider IDs remain evidence/crosswalks rather than canonical identity.
 - Historical CFBD lines are useful market evidence but are **not** timestamped sportsbook quote tape. Daily-Data-Core remains authoritative for sportsbook identity, aliases, quote chronology and no-vig.
 - B.2-C cross-provider reconciliation, B.2-D prospective live revision measurement and B.2-E availability-source trials remain before Phase C.
@@ -43,14 +43,15 @@ The project is being designed as a full production architecture from the beginni
 Current references:
 
 - [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V6.md`](./docs/data/PROVIDER_PROBE_RESULTS_V6.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V7.md`](./docs/data/PROVIDER_PROBE_RESULTS_V7.md)
 - [`docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md`](./docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md)
-- [`docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V2.md`](./docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V2.md)
+- [`docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md`](./docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md)
 
 Research-only probe tooling:
 
 - [`scripts/probes/provider_coverage_probe.py`](./scripts/probes/provider_coverage_probe.py)
 - [`scripts/probes/cfbd_native_family_probe.py`](./scripts/probes/cfbd_native_family_probe.py)
+- [`scripts/probes/cfbd_talent_scope_probe.py`](./scripts/probes/cfbd_talent_scope_probe.py)
 
 Phase C canonical-schema implementation remains intentionally blocked until B.2 has enough empirical evidence to design provider-independent contracts.
 
