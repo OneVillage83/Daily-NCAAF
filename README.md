@@ -24,42 +24,54 @@ The project is being designed as a full production architecture from the beginni
 
 ## Current phase
 
-**Phase B — Source & Coverage Audit** is active.
+**Phase B — Source, Coverage, PIT & Reconciliation Audit** is active.
 
 - **B.1 — Public Source & Contract Audit:** complete.
 - **B.2-A — CFBD games/PBP representative audit:** core complete.
-- Public SportsDataverse/cfbfastR measurement is complete for the current audit pass.
-- **B.2-B broad discovery:** complete for games/PBP, college-native families, the continuous 2015–2026 portal/talent/rating era scan, and the 2023–2026 Team Talent Composite exact-membership audit.
-- The observed CFBD transfer-portal coverage floor is **2021**: annual queries returned zero rows through 2020 and substantial coverage from 2021 onward.
-- Team Talent Composite membership is season-specific: 2023 contains all 133 FBS teams plus 105 additional programs; 2024 exactly matches all 134 FBS teams; 2025 is an FBS subset missing exactly **Air Force** and **Navy**; 2026 again exactly matches all 138 FBS teams.
-- `NO TALENT ROW != ZERO TALENT`; talent rows must be reconciled against canonical program-season membership.
-- CORE public retrospective coverage begins in 2016. Elo, SRS, SP+, FPI and CORE retain distinct entity-universe and temporal contracts.
-- Temporary HTTP 429 responses are transport states, not missing-data states. Targeted probes use bounded pacing/retry behavior.
-- **Positive identity continuity is now empirically verified in the selected cases.** CFBD roster athlete IDs remained stable for Jalen Milroe across four Alabama seasons, Dillon Gabriel across UCF→Oklahoma→Oregon, Travis Hunter across Jackson State FCS→Colorado FBS, and Caleb Downs across Alabama→Ohio State. Their recruiting `athleteId` values directly matched the roster athlete IDs.
-- The measured transfer-portal rows for Gabriel, Hunter, and Downs exposed contextual transfer evidence but **no explicit player/athlete identifier**. Portal rows therefore require reconciliation to canonical player identity.
-- CFBD coach IDs remained stable across school changes for Nick Saban, Kalen DeBoer, and Curt Cignetti, supporting them as strong provider crosswalks while Daily-NCAAF retains canonical `PERSON -> COACH -> COACH_ROLE_STINT` identity.
-- The provider roster field named `year` did not behave as the requested season key in the selected player cases; requested observation season must be stored explicitly rather than inferred from that field.
-- **Active B.2-B gate:** recruit-linkage hard cases where recruiting `athleteId` is null, including recovery through roster `recruitIds` and normalized-name collision evidence.
-- Historical CFBD lines remain useful market evidence but are **not** timestamped sportsbook quote tape. Daily-Data-Core remains authoritative for sportsbook identity, aliases, quote chronology and no-vig.
-- B.2-C cross-provider reconciliation, B.2-D prospective live revision measurement and B.2-E availability-source trials remain before Phase C.
+- **B.2-B — CFBD college-native family, era, scope and identity audit:** **complete**.
+- **B.2-C — CFBD ↔ ESPN/cfbfastR cross-provider reconciliation:** **active**.
+- B.2-D prospective live revision/PIT capture and B.2-E availability-source trials remain before production canonical-schema implementation is unlocked.
 
-Current references:
+### Locked B.2-B evidence
+
+- CFBD `classification=fbs` is an FBS-involved event universe, not strict FBS-vs-FBS.
+- sampled PBP `wallclock` is absent through 2017 and generally available-but-nullable from 2018 onward; it is not publication time.
+- PPA nullness is play-family dependent.
+- the 2024 Liberty-at-App-State incomplete game is a real Hurricane Helene cancellation.
+- observed CFBD transfer-portal coverage begins in 2021; portal rows contain useful transfer context but no explicit player identifier in the measured cases.
+- Team Talent Composite scope is season-specific: 2023 contains all FBS teams plus 105 extras; 2024 exactly matches FBS; 2025 is missing exactly Air Force and Navy; 2026 again exactly matches FBS.
+- `NO TALENT ROW != ZERO TALENT`.
+- CORE public retrospective history begins in 2016; Elo/SRS/SP+/FPI/CORE retain separate entity-universe and PIT contracts.
+- historical CFBD lines are not timestamped sportsbook quote tape; sportsbook identity, quote chronology and no-vig remain owned by `Daily-Data-Core`.
+- stable CFBD roster athlete IDs survived same-program seasons, multiple FBS transfers, and an FCS→FBS move in the measured Jalen Milroe, Dillon Gabriel, Travis Hunter and Caleb Downs cases.
+- stable CFBD coach IDs survived school changes for Nick Saban, Kalen DeBoer and Curt Cignetti.
+- direct recruiting `athleteId` linkage is materially incomplete.
+- across 12 sampled missing-`athleteId` recruits, zero roster `recruitIds` lists directly contained the tested recruiting-record ID; eight cases produced only a stable same-name roster candidate and four remained unresolved.
+- normalized-name collisions occurred in every tested recruiting year, including a case with the same normalized name, school and position on two distinct recruiting records.
+- `NAME MATCH != IDENTITY MATCH`.
+- `recruit.committedTo != canonical PLAYER_PROGRAM_STINT`.
+- provider roster field `year` cannot be assumed to equal requested roster season.
+- HTTP 429 is a transport/rate state, not a missing-data state.
+
+### Active B.2-C work
+
+The first cross-provider pass reconciles CFBD games against the public SportsDataverse `espn_cfb_schedules` release for 2024 and 2026.
+
+The schedule source defines `game_id` as the ESPN event identifier, so the harness tests exact game-ID equality empirically and then measures matched team/week/kickoff/score/lifecycle agreement.
+
+Raw ESPN-only events are retained as **event-universe differences** until classification scope is normalized; they are not automatically labeled CFBD omissions.
+
+Current B.2-C references:
 
 - [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V9.md`](./docs/data/PROVIDER_PROBE_RESULTS_V9.md)
-- [`docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md`](./docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md)
-- [`docs/data/CFBD_IDENTITY_CASE_PROBE_SPEC_V1.md`](./docs/data/CFBD_IDENTITY_CASE_PROBE_SPEC_V1.md)
-- [`docs/data/CFBD_RECRUIT_LINKAGE_GAP_PROBE_SPEC_V1.md`](./docs/data/CFBD_RECRUIT_LINKAGE_GAP_PROBE_SPEC_V1.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V10.md`](./docs/data/PROVIDER_PROBE_RESULTS_V10.md)
+- [`docs/data/B2C_CROSS_PROVIDER_RECONCILIATION_PLAN_V1.md`](./docs/data/B2C_CROSS_PROVIDER_RECONCILIATION_PLAN_V1.md)
+- [`scripts/probes/cross_provider_game_reconciliation_probe.py`](./scripts/probes/cross_provider_game_reconciliation_probe.py)
+- [`tests/probes/test_cross_provider_game_reconciliation_probe.py`](./tests/probes/test_cross_provider_game_reconciliation_probe.py)
 
-Research-only probe tooling:
+Research-only historical probe tooling remains under `scripts/probes/` and `tests/probes/`.
 
-- [`scripts/probes/provider_coverage_probe.py`](./scripts/probes/provider_coverage_probe.py)
-- [`scripts/probes/cfbd_native_family_probe.py`](./scripts/probes/cfbd_native_family_probe.py)
-- [`scripts/probes/cfbd_talent_scope_probe.py`](./scripts/probes/cfbd_talent_scope_probe.py)
-- [`scripts/probes/cfbd_identity_case_probe.py`](./scripts/probes/cfbd_identity_case_probe.py)
-- [`scripts/probes/cfbd_recruit_linkage_gap_probe.py`](./scripts/probes/cfbd_recruit_linkage_gap_probe.py)
-
-Phase C canonical-schema implementation remains intentionally blocked until B.2 has enough empirical evidence to design provider-independent contracts.
+Production canonical-schema implementation remains intentionally blocked until B.2-C/B.2-D/B.2-E produce enough evidence for provider-independent contracts.
 
 ## Architecture
 
