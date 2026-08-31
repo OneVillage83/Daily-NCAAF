@@ -1,8 +1,9 @@
 # Daily NCAAF — CFBD Recruit Linkage Gap Probe Spec V1
 
 **Phase:** B.2-B — Targeted Identity Cases  
-**Status:** ACTIVE  
-**Purpose:** measure how CFBD identity behaves when recruiting `athleteId` is absent, and surface unsafe name-collision cases.
+**Status:** COMPLETE  
+**Purpose:** measure how CFBD identity behaves when recruiting `athleteId` is absent, and surface unsafe name-collision cases.  
+**Result:** `docs/data/PROVIDER_PROBE_RESULTS_V10.md`
 
 ---
 
@@ -12,7 +13,7 @@ The positive identity cases proved that recruiting `athleteId` can directly link
 
 However broad recruiting measurement showed that `athleteId` is absent for a material share of recruits.
 
-This probe asks:
+This probe asked:
 
 ```text
 When recruit.athleteId is null,
@@ -52,7 +53,7 @@ Only the first state is an explicit provider-link recovery.
 
 ## 3. Target years
 
-Initial bounded scan:
+Measured bounded scan:
 
 ```text
 2021
@@ -67,53 +68,49 @@ These seasons are modern enough to have useful roster/recruiting coverage while 
 
 ## 4. Candidate selection
 
-For each year:
+For each year the probe:
 
-1. fetch the season-specific FBS program set;
-2. fetch high-school recruiting rows;
-3. filter to rows where:
-   - `athleteId` is null;
-   - `committedTo` is a measured FBS program;
-   - recruiting record ID and name are present;
-4. select a small deterministic sample, prioritizing higher-ranked records where ranking exists;
-5. query the committed program's roster for the same season;
-6. if no exact-name candidate is observed, query the following season as a bounded fallback.
+1. fetched the season-specific FBS program set;
+2. fetched high-school recruiting rows;
+3. filtered to rows where:
+   - `athleteId` was null;
+   - `committedTo` was a measured FBS program;
+   - recruiting record ID and name were present;
+4. selected a small deterministic sample, prioritizing higher-ranked records where ranking existed;
+5. queried the committed program's roster for the same season;
+6. if no exact-name candidate was observed, queried the following season as a bounded fallback.
 
-This is a research sample, not an estimate of national reconciliation success rate.
+This was a research sample, not an estimate of national reconciliation success rate.
 
 ---
 
-## 5. Direct provider-link recovery
+## 5. Direct provider-link recovery rule
 
-For each roster candidate, inspect:
+For each roster candidate the probe inspected:
 
 ```text
 roster.recruitIds
 ```
 
-If the recruiting record's provider recruit ID appears in that list, classify:
+If the recruiting record's provider recruit ID appeared in that list, the intended classification was:
 
 ```text
 DIRECT_ROSTER_RECRUIT_ID_LINK
 ```
 
-This is direct provider evidence despite the recruiting row lacking `athleteId`.
-
-If an exact-name candidate exposes one stable roster athlete ID but does not carry the recruit ID, classify only:
+If an exact-name candidate exposed one stable roster athlete ID but did not carry the recruit ID, it remained:
 
 ```text
 NAME_CONTEXT_ONLY_STABLE_ROSTER_CANDIDATE
 ```
 
-Do not promote it automatically.
-
-If multiple candidate roster IDs share the normalized name, classify:
+If multiple candidate roster IDs shared the normalized name:
 
 ```text
 AMBIGUOUS_NAME_COLLISION
 ```
 
-If no candidate is found:
+If no candidate was found:
 
 ```text
 UNRESOLVED
@@ -123,9 +120,9 @@ UNRESOLVED
 
 ## 6. Name-collision audit
 
-Within each recruiting-year response, group rows by normalized name.
+Within each recruiting-year response, rows were grouped by normalized name.
 
-Surface bounded examples where one normalized name maps to multiple recruiting records, including:
+The probe surfaced bounded examples with:
 
 ```text
 recruit record ID
@@ -135,67 +132,66 @@ position
 athleteId
 ```
 
-This provides empirical evidence for the rule that names cannot be primary keys even before roster reconciliation.
-
-Duplicate-name records are not automatically duplicate people; they are ambiguity evidence.
+Duplicate-name records were treated as ambiguity evidence, never automatic duplicate people.
 
 ---
 
-## 7. Output contract
+## 7. Measured outcome
 
-Top-level output must include:
-
-```text
-contract_version
-research_only
-generated_at
-secret_policy
-years
-max_cases_per_year
-request_delay_seconds
-max_429_retries
-status
-results
-```
-
-Each year should include:
+The local test suite reported:
 
 ```text
-FBS/recruiting HTTP state
-recruit row count
-athleteId-null count
-FBS-committed athleteId-null count
-selected missing-link cases
-normalized-name collision examples
+Ran 9 tests in 0.003s
+OK
 ```
 
-Each selected case records only bounded fields needed for the audit.
+Across 12 selected missing-`athleteId` cases:
+
+```text
+DIRECT_ROSTER_RECRUIT_ID_LINK                 0
+NAME_CONTEXT_ONLY_STABLE_ROSTER_CANDIDATE     8
+UNRESOLVED                                    4
+```
+
+No sampled roster `recruitIds` list contained the tested recruiting-record ID.
+
+This does **not** prove roster `recruitIds` are never useful. It proves they cannot be assumed to provide a direct join to the selected `/recruiting/players` row without additional semantic evidence.
+
+Normalized-name collisions were observed in every tested year, including cases where same name, school and position still did not provide a safe unique record identity.
+
+Full evidence and canonical consequences are recorded in:
+
+```text
+docs/data/PROVIDER_PROBE_RESULTS_V10.md
+```
 
 ---
 
 ## 8. Reliability / secret policy
 
-- `CFBD_API_KEY` comes from the local environment only.
-- Never emit the key.
-- Use paced requests.
-- Retry HTTP 429 with bounded backoff / `Retry-After` support.
-- HTTP failure remains a transport state, not a data-coverage result.
-- Research tooling must remain separate from production acquisition.
+- `CFBD_API_KEY` came from the local environment only.
+- The key was never emitted.
+- Requests were paced.
+- HTTP 429 behavior used bounded backoff.
+- HTTP failure remained a transport state, not a data-coverage result.
+- Research tooling remains separate from production acquisition.
 
 ---
 
-## 9. Exit criterion
+## 9. Exit decision
 
-This probe completes the remaining B.2-B recruit-linkage hard case when it demonstrates at least one of the following with explicit evidence:
+The exit criterion is satisfied because the probe demonstrated both contextual-only missing-link behavior and empirical name ambiguity without exposing a new failure mode requiring additional broad CFBD discovery.
 
-1. missing recruiting `athleteId` can sometimes be recovered through roster `recruitIds`;
-2. missing `athleteId` can leave only contextual/name evidence;
-3. normalized-name collisions make automatic merging unsafe.
-
-After documenting those outcomes, B.2-B can close unless a new provider-identity failure mode appears.
-
-Then advance to:
+Therefore:
 
 ```text
-B.2-C — CFBD <-> ESPN/cfbfastR reconciliation
+B.2-B — COMPLETE
+B.2-C — ACTIVE NEXT
+```
+
+Continue with:
+
+```text
+docs/data/B2C_CROSS_PROVIDER_RECONCILIATION_PLAN_V1.md
+scripts/probes/cross_provider_game_reconciliation_probe.py
 ```
