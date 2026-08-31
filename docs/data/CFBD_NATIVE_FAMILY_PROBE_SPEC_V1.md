@@ -1,14 +1,14 @@
 # Daily NCAAF — CFBD College-Native Family Probe Specification V1
 
 **Phase:** B.2-B — CFBD College-Native Family Expansion  
-**Status:** ACTIVE  
+**Status:** INITIAL PASS COMPLETE; focused follow-up active  
 **Contract:** `DAILY_NCAAF_PHASE_B2_CFBD_NATIVE_FAMILY_PROBE_V1`
 
 ---
 
 ## 1. Purpose
 
-B.2-A established representative CFBD game/PBP behavior. B.2-B now measures the college-football-native identity and state families that matter most to Daily-NCAAF:
+B.2-A established representative CFBD game/PBP behavior. B.2-B measures the college-football-native identity and state families that matter most to Daily-NCAAF:
 
 ```text
 teams / conference affiliation
@@ -24,6 +24,18 @@ historical lines
 ```
 
 The goal is not to download the entire provider. The goal is to measure enough representative eras and identity/state behavior to constrain provider-independent Phase C contracts.
+
+The initial representative run described by this specification is now complete. Its measured results are recorded in:
+
+```text
+docs/data/PROVIDER_PROBE_RESULTS_V5.md
+```
+
+The evidence-driven next pass is defined in:
+
+```text
+docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V1.md
+```
 
 ---
 
@@ -44,7 +56,7 @@ The goal is not to download the entire provider. The goal is to measure enough r
 
 ## 3. Initial representative eras
 
-Default seasons:
+Initial seasons:
 
 ```text
 2014
@@ -60,13 +72,13 @@ Why:
 - **2024** — modern realignment/12-team CFP era with rich completed-season data;
 - **2026** — current/live season-state behavior.
 
-Later passes may add 2004/2010/2015/2020/2025 where a family’s observed floor or transition requires it.
+The first pass demonstrated that continuous-year follow-up is now required for portal/talent/rating era floors.
 
 ---
 
 ## 4. Representative roster programs
 
-Default roster sample:
+Initial roster sample:
 
 ```text
 Alabama
@@ -75,9 +87,9 @@ Notre Dame
 Boise State
 ```
 
-This deliberately spans major-conference and independent/non-power-program contexts. These are probe examples, not privileged production identities.
+This deliberately spans major-conference, independent and non-power-program contexts. These are probe examples, not privileged production identities.
 
-A later identity-specific pass must include known transfer players, multiple-transfer players, similar-name collisions, position/jersey changes and FBS/FCS movers.
+The next identity-specific pass must include known transfer players, multiple-transfer players, similar-name collisions, position/jersey changes and FBS/FCS movers.
 
 ---
 
@@ -91,14 +103,9 @@ Endpoint:
 GET /teams/fbs?year=<year>
 ```
 
-Measure:
+Measure rows, provider team-ID uniqueness, school/conference nullness and classification distribution.
 
-- rows;
-- unique provider team IDs;
-- duplicate IDs;
-- school nullness;
-- conference nullness;
-- classification distribution.
+Initial result: unique/non-null FBS team IDs in all representative seasons. See V5.
 
 ### 5.2 Historical conference affiliation
 
@@ -108,16 +115,9 @@ Endpoint:
 GET /conferences/affiliations?year=<year>&classification=fbs
 ```
 
-Measure:
+Measure rows, unique team IDs, conference nullness, open-ended affiliation rows and classification distribution.
 
-- rows;
-- unique team IDs;
-- team-ID nullness;
-- conference nullness;
-- open-ended affiliation rows;
-- classification distribution.
-
-This family is especially important for program-season identity and realignment.
+Historical affiliation truth remains separate from historical publication timing.
 
 ### 5.3 Rosters
 
@@ -127,14 +127,9 @@ Endpoint:
 GET /roster?year=<year>&team=<team>&classification=fbs
 ```
 
-Measure:
+Measure player ID uniqueness, position/jersey/height/weight nullness and `recruitIds` linkage.
 
-- rows;
-- player ID uniqueness;
-- position/jersey/height/weight nullness;
-- `recruitIds` presence/non-empty linkage.
-
-Historical roster truth is not automatically pregame expected participation.
+Initial result: provider player IDs were clean in sampled teams, while direct recruit linkage varied materially by team/era. Historical roster truth is not automatically pregame expected participation.
 
 ### 5.4 Recruiting
 
@@ -144,13 +139,9 @@ Endpoint:
 GET /recruiting/players?year=<year>&classification=HighSchool
 ```
 
-Measure:
+Measure recruiting record ID uniqueness and nullable `athleteId`, commitment, ranking/rating/stars and position fields.
 
-- recruiting record ID uniqueness;
-- nullable `athleteId` linkage rate;
-- commitment/ranking/rating/stars/position missingness.
-
-`athleteId` is a useful provider linkage signal, but Daily-NCAAF may not auto-merge records when the linkage is absent.
+Initial result: direct `athleteId` linkage is useful but materially incomplete. No absent provider link may be silently replaced by a name-only merge.
 
 ### 5.5 Transfer portal
 
@@ -160,16 +151,9 @@ Endpoint:
 GET /player/portal?year=<year>
 ```
 
-Measure:
+Measure rows, destination/date/rating/stars missingness, eligibility and origin/destination breadth.
 
-- rows;
-- destination nullness;
-- transfer-date nullness;
-- rating/stars missingness;
-- eligibility distribution;
-- unique origins/destinations.
-
-A transfer row does not create a new canonical player identity.
+Initial result: 2014/2018 returned zero rows while 2024/2026 were heavily populated. The exact provider availability floor is now a focused follow-up target.
 
 ### 5.6 Returning production
 
@@ -179,14 +163,9 @@ Endpoint:
 GET /player/returning?year=<year>
 ```
 
-Measure:
+Measure rows/teams and PPA/usage missingness.
 
-- rows and unique teams;
-- conference nullness;
-- total/percent PPA missingness;
-- usage missingness.
-
-This remains a derived provider feature family and needs separate PIT/reconstruction treatment.
+This remains a derived provider feature family and requires separate PIT/reconstruction treatment.
 
 ### 5.7 Coaches
 
@@ -196,14 +175,9 @@ Endpoint:
 GET /coaches?year=<year>
 ```
 
-Measure:
+Measure coach provider-ID uniqueness and queried-year nested-season behavior.
 
-- coach provider ID uniqueness;
-- whether the queried year appears in returned nested seasons;
-- career-season entry counts;
-- deprecated `hireDate` missingness only as an observed source field.
-
-The architecture remains `PERSON -> COACH -> COACH_ROLE_STINT`; a current provider head-coach record does not solve coordinator/play-caller history.
+The first pass did not establish cross-season coach-ID continuity and does not solve coordinator/play-caller history.
 
 ### 5.8 Talent composite
 
@@ -215,7 +189,7 @@ GET /talent?year=<year>
 
 Measure rows, unique teams and missing values.
 
-Talent composite is a derived external rating and must receive its own feature/PIT contract.
+Initial result: 2014 returned zero, 2018 returned a universe much larger than FBS, and 2024/2026 matched FBS-sized counts. Historical scope must be resolved before feature use.
 
 ### 5.9 Rankings
 
@@ -225,13 +199,13 @@ Endpoint:
 GET /rankings?year=<year>&seasonType=both
 ```
 
-Measure snapshot rows, weeks, poll families and nested rank rows.
+Measure snapshot rows, week labels, poll names and nested rank counts.
 
-Published poll snapshots may be useful historical state, but exact release timing still needs a defensible availability rule.
+Initial result: some historical seasons contain multiple snapshot rows sharing week `1`; `(season, week)` alone is therefore not accepted as canonical ranking identity.
 
 ### 5.10 Ratings
 
-Initial endpoints:
+Endpoints:
 
 ```text
 GET /ratings/elo
@@ -241,95 +215,80 @@ GET /ratings/fpi
 GET /ratings/core
 ```
 
-Measure rows, unique teams and conference missingness by era.
+Measure rows, unique teams and conference nullness by family/era.
 
-Special caution:
-
-- rating families differ in historical coverage and semantics;
-- CFBD documents CORE historical ratings as retrospective methodology output, not a record of what CORE would have said at that historical time;
-- no rating is automatically PIT-safe merely because `year` or `week` exists.
+Initial result: rating families have materially different coverage, entity-universe and current-season readiness semantics. Each family requires its own PIT/provenance contract.
 
 ### 5.11 Historical lines
 
-Initial bounded query:
+Endpoint:
 
 ```text
-GET /lines?year=<year>&week=1&seasonType=regular
+GET /lines?year=<year>&week=<week>&seasonType=regular
 ```
 
-Measure:
+Measure game rows, games with lines, nested line observations, provider names, spread/total/opening/moneyline coverage.
 
-- game rows;
-- games with one or more line observations;
-- line observation count;
-- provider distribution;
-- spread/total/opening-field/moneyline missingness.
-
-Locked interpretation:
-
-```text
-historical line response != timestamped historical quote tape
-```
-
-Daily-Data-Core remains the owner of sportsbook quote snapshots and market chronology.
+Initial result: field richness changes sharply by era and raw provider-name aliases exist. Historical line responses remain market evidence rather than timestamped quote tape.
 
 ---
 
-## 6. Failure and quota behavior
+## 6. Secret and output policy
 
-The probe must not abort the entire audit because one endpoint returns an access-tier, rate-limit or family-specific error.
+`CFBD_API_KEY` remains environment-only. The generated aggregate JSON contains no key value.
 
-Each family records its HTTP status/error independently so we can distinguish:
+Recommended local output:
 
 ```text
-AVAILABLE
-EMPTY
-CREDENTIAL_OR_TIER_GATED
-RATE_LIMITED
-PROVIDER_ERROR
+local-data/probes/
 ```
 
-without silently converting those states into missing data.
+which remains ignored by Git.
 
 ---
 
-## 7. Local run
-
-After pulling the branch and confirming `CFBD_API_KEY` remains set in the PowerShell session:
+## 7. Initial run — completed
 
 ```powershell
-python -m unittest discover -s tests/probes -p "test_cfbd_native_family_probe.py" -v
-
 python scripts/probes/cfbd_native_family_probe.py `
   --seasons 2014,2018,2024,2026 `
   --teams "Alabama,Michigan,Notre Dame,Boise State" `
   --output local-data/probes/cfbd_native_families_v1.json
 ```
 
-The JSON remains under ignored `local-data/`.
-
-If quota/tier limits make the all-family pass too expensive, use `--families` to run smaller groups, for example:
-
-```powershell
-python scripts/probes/cfbd_native_family_probe.py `
-  --seasons 2014,2018,2024,2026 `
-  --families teams,conferences,rosters,recruiting,portal,returning `
-  --output local-data/probes/cfbd_native_identity_v1.json
-```
+The helper tests passed locally before the authenticated run.
 
 ---
 
-## 8. B.2-B completion criteria
+## 8. Next run
 
-B.2-B does not close when the endpoints merely return 200.
+Do not repeat the full initial matrix. Use the focused plan:
 
-It closes only when we can describe, by family and era:
+```text
+docs/data/CFBD_NATIVE_FAMILY_FOLLOWUP_PLAN_V1.md
+```
 
-- coverage floors and structural zeros;
-- identifier quality;
-- major missingness;
-- revision/PIT classification or conservative exclusion;
-- identity implications;
-- whether the provider is primary, secondary, benchmark-only or unsuitable for that family.
+Immediate next call set:
 
-The resulting evidence feeds B.2-C cross-provider reconciliation and then Phase C canonical schema design.
+```powershell
+python scripts/probes/cfbd_native_family_probe.py `
+  --seasons 2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026 `
+  --families "portal,talent,ratings" `
+  --output local-data/probes/cfbd_native_era_scan_v1.json
+```
+
+This bounded scan locates the remaining availability/scope transitions before actual player/coach identity reconciliation begins.
+
+---
+
+## 9. B.2-B completion gate
+
+B.2-B is sufficiently measured when:
+
+1. major native families have explicit availability eras;
+2. team/program/recruit/player/coach identity strengths and gaps are quantified;
+3. derived ratings/returning-production/talent families have explicit PIT classifications;
+4. historical market evidence remains separated from timestamped market tape;
+5. remaining questions are identity/reconciliation problems rather than vague provider-coverage assumptions.
+
+At that point move into B.2-C instead of expanding provider calls indefinitely.
