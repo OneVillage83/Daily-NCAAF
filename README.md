@@ -30,28 +30,30 @@ The project is being designed as a full production architecture from the beginni
 - **B.2-A — CFBD games/PBP representative audit:** core complete.
 - Public SportsDataverse/cfbfastR measurement is complete for the current audit pass.
 - The authenticated CFBD event audit located the sampled `wallclock` coverage break between 2017 and 2018, proved that `classification=fbs` includes FBS-vs-FCS games, resolved the 2024 Liberty–App State incomplete row as a real cancellation, and showed that PPA nullness is play-family dependent.
-- **B.2-B — CFBD college-native family expansion:** broad family discovery and continuous 2015–2026 portal/talent/rating era scanning are complete. Targeted entity-scope and identity cases are now active.
+- **B.2-B — CFBD college-native family expansion:** broad family discovery, continuous 2015–2026 portal/talent/rating era scanning, and the 2023–2026 Team Talent Composite membership audit are complete. Targeted player/transfer/coach identity cases are now active.
 - The observed CFBD transfer-portal coverage floor is **2021**: annual queries returned zero rows through 2020 and substantial coverage from 2021 onward.
-- The clean 2025 retry returned 4,499 portal rows with complete `transferDate` but material destination/rating missingness.
-- Talent-composite responses have changing entity scope: they are much broader than FBS through 2023, equal the measured 2024 FBS row count, and return only 134 teams in 2025 while FBS-sized rating families return 136. Direct membership comparison is therefore required instead of row-count inference.
+- Team Talent Composite membership is season-specific: 2023 contains all 133 FBS teams plus 105 additional programs; 2024 exactly matches all 134 FBS teams; 2025 is an FBS subset missing exactly **Air Force** and **Navy**; 2026 again exactly matches all 138 FBS teams.
+- Therefore `NO TALENT ROW != ZERO TALENT`, and talent rows must be reconciled against canonical program-season membership rather than used as implicit classification/completeness evidence.
 - CORE public retrospective coverage begins in 2016. Elo, SRS, SP+, FPI and CORE retain distinct entity-universe and temporal contracts; SRS expands well beyond the FBS count beginning in the observed 2022 response.
-- Temporary HTTP 429 responses are transport states, not missing-data states. Targeted probes now use bounded request pacing/retry behavior where appropriate.
+- Temporary HTTP 429 responses are transport states, not missing-data states. Targeted probes use bounded request pacing/retry behavior.
 - Direct recruiting↔college-player linkage is useful but incomplete; provider IDs remain evidence/crosswalks rather than canonical identity.
+- The active identity probe tests Jalen Milroe, Dillon Gabriel, Travis Hunter and Caleb Downs plus Nick Saban, Kalen DeBoer and Curt Cignetti. Name matching finds candidates only; it never establishes canonical identity.
 - Historical CFBD lines are useful market evidence but are **not** timestamped sportsbook quote tape. Daily-Data-Core remains authoritative for sportsbook identity, aliases, quote chronology and no-vig.
 - B.2-C cross-provider reconciliation, B.2-D prospective live revision measurement and B.2-E availability-source trials remain before Phase C.
 
 Current references:
 
 - [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V7.md`](./docs/data/PROVIDER_PROBE_RESULTS_V7.md)
-- [`docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md`](./docs/data/CFBD_NATIVE_FAMILY_PROBE_SPEC_V1.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V8.md`](./docs/data/PROVIDER_PROBE_RESULTS_V8.md)
 - [`docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md`](./docs/data/CFBD_NATIVE_IDENTITY_SCOPE_PLAN_V1.md)
+- [`docs/data/CFBD_IDENTITY_CASE_PROBE_SPEC_V1.md`](./docs/data/CFBD_IDENTITY_CASE_PROBE_SPEC_V1.md)
 
 Research-only probe tooling:
 
 - [`scripts/probes/provider_coverage_probe.py`](./scripts/probes/provider_coverage_probe.py)
 - [`scripts/probes/cfbd_native_family_probe.py`](./scripts/probes/cfbd_native_family_probe.py)
 - [`scripts/probes/cfbd_talent_scope_probe.py`](./scripts/probes/cfbd_talent_scope_probe.py)
+- [`scripts/probes/cfbd_identity_case_probe.py`](./scripts/probes/cfbd_identity_case_probe.py)
 
 Phase C canonical-schema implementation remains intentionally blocked until B.2 has enough empirical evidence to design provider-independent contracts.
 
