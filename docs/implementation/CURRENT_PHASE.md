@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. Phase B.1 public source/contract audit complete. B.2-A CFBD games/PBP measurement core complete. **B.2-B CFBD college-native family/era/scope/identity audit is complete. B.2-C cross-provider reconciliation is active, with C1 game/event identity at its final V4 counterpart-anchor exit gate.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
+**Current status:** Architecture V1 complete. Phase B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity is COMPLETE/FROZEN and C2 program/team provider-crosswalk stability is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
 
 ---
 
@@ -8,7 +8,7 @@
 
 ## B.1 — Public Source & Contract Audit — COMPLETE
 
-Provider registry, source coverage matrix, PIT availability matrix, canonical identity rules, ruleset eras, and Daily-Data-Core ownership boundaries are documented.
+Provider registry, source coverage matrix, PIT availability matrix, canonical identity rules, ruleset eras and Daily-Data-Core ownership boundaries are documented.
 
 ## B.2-A — CFBD games/PBP — CORE COMPLETE
 
@@ -19,7 +19,7 @@ Locked findings include:
 - provider `wallclock` is not publication time and never replaces Daily-NCAAF `acquired_at`;
 - PPA nullness is play-family dependent;
 - `classification=fbs` is an FBS-involved universe including FBS-vs-FCS games;
-- Liberty-at-App-State 2024 is a real cancellation, not a missing completion artifact;
+- Liberty-at-App-State 2024 is a real cancellation;
 - current-season responses change across acquisitions, requiring immutable observations.
 
 Prospective correction/revision timing remains B.2-D.
@@ -30,7 +30,7 @@ Prospective correction/revision timing remains B.2-D.
 
 Detailed evidence is retained through `docs/data/PROVIDER_PROBE_RESULTS_V10.md`.
 
-Locked identity/source rules include:
+Locked:
 
 ```text
 provider team/player/coach ID != canonical Daily-NCAAF identity
@@ -42,147 +42,84 @@ NO TALENT ROW != ZERO TALENT
 HTTP 429 != missing data
 ```
 
-Observed player continuity included Jalen Milroe, Dillon Gabriel, Travis Hunter and Caleb Downs. Stable coach IDs were measured across program changes for Nick Saban, Kalen DeBoer and Curt Cignetti. Recruiting `athleteId` linkage is materially incomplete, roster `recruitIds` did not directly recover the sampled missing-link recruiting rows, and normalized-name collisions occurred in every tested recruiting year.
+Stable CFBD player IDs survived same-program seasons, multiple transfers and FCS→FBS movement in selected cases. Stable coach IDs survived program changes. Recruiting linkage remains incomplete and name-only repair is unsafe.
 
 ---
 
 # B.2-C — CFBD <-> ESPN/cfbfastR reconciliation — ACTIVE
 
-## C1 — Game/event reconciliation — FINAL V4 EXIT GATE
+## C1 — Game / event reconciliation — COMPLETE / FROZEN
 
-Latest evidence:
-
-```text
-docs/data/PROVIDER_PROBE_RESULTS_V13.md
-docs/data/B2C_GAME_RECONCILIATION_FOLLOWUP_V3.md
-```
-
-### V3 completed measurement
-
-The user-executed V3 run passed all 14 unit tests and produced:
+Freeze contract:
 
 ```text
-contract = DAILY_NCAAF_PHASE_B2C_CROSS_PROVIDER_GAME_RECONCILIATION_V3
+docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md
 ```
 
-2024 event universe:
+Final evidence:
+
+```text
+docs/data/PROVIDER_PROBE_RESULTS_V14.md
+```
+
+The user-executed V4 suite passed all 10 tests.
+
+### Completed 2024 freeze evidence
 
 ```text
 CFBD FBS-involved events                 920
 SportsDataverse/ESPN events              966
 exact shared event IDs                    920
-CFBD-only raw IDs                           0
-ESPN-only raw IDs                          46
 normalized ESPN FBS-involved events      920
 normalized exact overlap                  920
 normalized CFBD-only                        0
 normalized ESPN-only                        0
+
+SAME_SIDE                                 918
+SWAPPED_SIDES                               2
+UNRESOLVED                                  0
+AMBIGUOUS                                   0
+
+ONE_PARTICIPANT_EXACT_EVENT_COUNTERPART_ANCHOR  2
+
+week MATCH                                920
+score MATCH                               919
+score UNAVAILABLE                           1
+score MISMATCH                              0
+lifecycle MATCH                           920
+
+participant observations                 1840
+unique CFBD team names                    230
+unique ESPN team IDs                      230
+CFBD-name -> multiple ESPN-ID conflicts     0
+ESPN-ID -> multiple CFBD-name conflicts     0
+matched games skipped                       0
 ```
 
-This is strong empirical evidence that the measured CFBD game ID and SportsDataverse/ESPN `game_id` share the ESPN event-ID namespace for the complete 2024 FBS-involved universe.
+The single unavailable score is the real Liberty-at-App-State cancellation.
 
-### Provider home/away side is not identity
-
-V3 correctly resolves two postseason side swaps:
+### Frozen C1 identity rules
 
 ```text
-401677085  UTSA / Coastal Carolina
-401677093  USC / Texas A&M
-```
-
-Both become score matches after participant alignment.
-
-Locked:
-
-```text
-same event + same participant set + swapped provider sides != identity conflict
 provider home/away side != canonical participant identity
+same exact event + same participant set + swapped provider sides != identity conflict
+scores are compared only after participant alignment
+provider season totals are compared only after event-universe normalization
 ```
 
-### V3 remaining edge case
-
-V3 participant orientation counts:
+Inside an exact-ID matched two-participant event:
 
 ```text
-SAME_SIDE       916
-SWAPPED_SIDES     2
-UNRESOLVED        2
-```
-
-The only unresolved exact-ID events are:
-
-```text
-401644732  Kent State vs Saint Francis
-401644737  Eastern Michigan vs Saint Francis
-```
-
-CFBD uses `Saint Francis`; ESPN/SportsDataverse uses `St. Francis (PA) Red Flash`. In each event, the other participant is independently aligned on the same side.
-
-The correct general reconciliation rule is therefore:
-
-```text
-EXACT EVENT ID
-+ two-participant event
-+ one strong participant alignment
+one strong participant alignment
 + no competing opposite-orientation anchor
 => remaining participant may be aligned by counterpart elimination
 ```
 
-This is not a global hard-coded alias rule.
-
-### V4 tooling — ACTIVE NEXT
-
-```text
-scripts/probes/cross_provider_game_reconciliation_probe_v4.py
-tests/probes/test_cross_provider_game_reconciliation_probe_v4.py
-```
-
-V4 preserves V3's event-ID, side-swap, score-alignment, asset-freshness and snapshot semantics while adding explicit alignment-basis evidence:
-
-```text
-TWO_PARTICIPANT_DISPLAY_EVIDENCE
-ONE_PARTICIPANT_EXACT_EVENT_COUNTERPART_ANCHOR
-COMPETING_TWO_PARTICIPANT_DISPLAY_EVIDENCE
-COMPETING_ONE_PARTICIPANT_ANCHORS
-INSUFFICIENT_PARTICIPANT_DISPLAY_EVIDENCE
-```
-
-V4 must never use a one-participant anchor when the opposite orientation has competing strong evidence.
-
-### C1 freeze requirements
-
-For completed 2024, require:
-
-```text
-exact shared IDs                           920
-normalized FBS overlap                     920 / 920
-normalized CFBD-only                         0
-normalized ESPN-only                         0
-unresolved orientation                       0
-ambiguous orientation                        0
-team crosswalk conflicts                     0
-score mismatch                               0
-week mismatch                                0
-```
-
-Expected audit shape if the source artifact is unchanged:
-
-```text
-SAME_SIDE                                  918
-SWAPPED_SIDES                                2
-ONE_PARTICIPANT_EXACT_EVENT_COUNTERPART_ANCHOR 2
-score MATCH                                919
-score UNAVAILABLE                            1
-participant observations                  1840
-unique CFBD names                          230
-unique ESPN IDs                            230
-```
-
-These are exit expectations, not hard-coded production truths.
+This resolved the two `Saint Francis` vs `St. Francis (PA) Red Flash` events without creating a global alias rule.
 
 ### Kickoff semantics remain separate
 
-2024 V3 kickoff deltas:
+2024 V4 kickoff deltas:
 
 ```text
 <= 60 seconds             905
@@ -192,11 +129,11 @@ These are exit expectations, not hard-coded production truths.
 > 2 hours                     2
 ```
 
-Provider kickoff disagreement remains source-time evidence until scheduled/revised/actual-start semantics are proven.
+These remain provider-time semantic observations, not C1 identity failures.
 
-### 2026 acquisition-state evidence
+### 2026 remains acquisition-state evidence
 
-At V3 acquisition:
+At V4 acquisition:
 
 ```text
 CFBD season events                    888
@@ -205,7 +142,7 @@ exact shared event IDs                  8
 ESPN-only                                0
 ```
 
-All eight shared kickoff timestamps matched. Three exact matched events were already final in CFBD while the immutable downloaded SportsDataverse asset still contained `STATUS_IN_PROGRESS` and intermediate scores.
+Three shared events were final in CFBD while the immutable SportsDataverse asset still carried `STATUS_IN_PROGRESS` and intermediate scores.
 
 Locked:
 
@@ -219,10 +156,49 @@ This supports B.2-D but does not replace prospective repeated live capture.
 
 ---
 
-## C2-C6 — queued after C1
+## C2 — Program / team provider crosswalk — ACTIVE
+
+Plan:
 
 ```text
-C2 program/team provider crosswalk freeze
+docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_PLAN_V1.md
+```
+
+Tooling:
+
+```text
+scripts/probes/cross_provider_team_crosswalk_probe.py
+tests/probes/test_cross_provider_team_crosswalk_probe.py
+```
+
+Initial completed-season window:
+
+```text
+2023
+2024
+2025
+```
+
+C2 uses the frozen C1 participant-aligned schedule crosswalk and independently fetches CFBD `/teams/fbs?year=`. It measures:
+
+```text
+FBS schedule-crosswalk coverage
+CFBD team id == derived ESPN team id
+within-season ID collisions
+same school name -> multiple provider IDs across seasons
+same provider ID -> multiple school names across seasons
+FBS membership entry/exit transitions
+```
+
+Provider IDs remain crosswalks, never canonical `PROGRAM_ID` values.
+
+C2 freeze requires complete or explicitly explained completed-season coverage, no unresolved within-season collisions, and direct provider-ID disagreements to be individually explained rather than normalized away.
+
+---
+
+## C3-C6 — queued after C2
+
+```text
 C3 player cross-provider identity
 C4 transfer continuity across providers
 C5 venue/conference/context agreement
@@ -233,7 +209,7 @@ Cross-provider matching never makes a historical source PIT-safe by itself.
 
 ---
 
-## B.2-D — Prospective live timestamp/revision capture — ACTIVE WHEN GAMES ARE LIVE
+## B.2-D — Prospective live timestamp/revision capture — STILL REQUIRED
 
 Required repeated evidence:
 
@@ -247,7 +223,7 @@ correction time
 
 ## B.2-E — Availability-source trial — QUEUED
 
-Evaluate official conference/program feeds plus commercial trials against timestamp, revision, identity, latency, and missing-report criteria because the public ESPN-derived injury family produced zero observations across completed 2024.
+Evaluate official conference/program feeds plus commercial trials against timestamp, revision, identity, latency and missing-report criteria because the public ESPN-derived injury family produced zero observations across completed 2024.
 
 ---
 
@@ -258,8 +234,8 @@ Production canonical schema remains blocked until:
 1. major F-0 through F-14 source families have empirical coverage evidence where access permits;
 2. inaccessible/commercial families are explicitly trial/credential-gated;
 3. major PIT/revision semantics have validated classifications or conservative exclusions;
-4. representative cross-provider game/program/player reconciliation is strong enough for provider-independent identity contracts;
-5. remaining gaps are explicit rather than silently assumed away;
+4. representative cross-provider game/program/player reconciliation supports provider-independent identity contracts;
+5. remaining gaps are explicit rather than assumed away;
 6. no schema assumes a provider field is complete, unique, canonical or PIT-safe without evidence.
 
 Production backfill, feature engineering, training, simulation and Recommendation Gate implementation remain intentionally blocked until this gate is met.
