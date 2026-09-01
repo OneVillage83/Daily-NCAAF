@@ -2,7 +2,7 @@
 
 **The Daily Line — College Football Intelligence Engine**
 
-Daily NCAAF is the college-football-specific prediction, simulation, market-evaluation, and continuous-learning system for The Daily Line.
+Daily NCAAF is the college-football-specific prediction, simulation, market-evaluation and continuous-learning system for The Daily Line.
 
 The repository is being built as a full production architecture from the beginning rather than as a disposable MVP. Architecture and evidence contracts are documented before implementation so source semantics, identity, point-in-time rules and evaluation assumptions cannot silently drift.
 
@@ -29,114 +29,90 @@ The repository is being built as a full production architecture from the beginni
 - **B.1 — Public Source & Contract Audit:** complete.
 - **B.2-A — CFBD games/PBP representative audit:** core complete.
 - **B.2-B — CFBD college-native family, era, scope and identity audit:** complete.
-- **B.2-C — CFBD ↔ ESPN/cfbfastR cross-provider reconciliation:** active; C1 game/event identity is at its final V4 counterpart-anchor exit gate.
+- **B.2-C C1 — Game/event reconciliation:** **COMPLETE / FROZEN**.
+- **B.2-C C2 — Program/team provider crosswalk:** **ACTIVE**.
 - **B.2-D — Prospective live revision/PIT capture:** still required.
 - **B.2-E — Availability-source trials:** still required.
 
 Production canonical-schema implementation remains intentionally blocked until the Phase B evidence gate is satisfied.
 
-### Locked B.2-B evidence
+## C1 game/event identity — frozen
 
-- CFBD `classification=fbs` is an FBS-involved event universe, not strict FBS-vs-FBS.
-- sampled PBP `wallclock` is absent through 2017 and generally available-but-nullable from 2018 onward; it is not publication time.
-- PPA nullness is play-family dependent.
-- observed transfer-portal coverage begins in 2021; measured portal rows contain transfer context but no explicit player identifier.
-- Team Talent Composite scope is season-specific; 2025 is missing exactly Air Force and Navy.
-- `NO TALENT ROW != ZERO TALENT`.
-- stable CFBD roster athlete IDs survived same-program seasons, multiple transfers and an FCS→FBS move in selected cases.
-- stable CFBD coach IDs survived school changes in selected cases.
-- direct recruiting `athleteId` linkage is materially incomplete.
-- sampled roster `recruitIds` did not directly recover tested missing-`athleteId` recruiting rows.
-- normalized-name collisions occurred in every tested recruiting year.
-- `NAME MATCH != IDENTITY MATCH`.
-- `recruit.committedTo != canonical PLAYER_PROGRAM_STINT`.
-- historical CFBD lines are not timestamped sportsbook quote tape; sportsbook identity, quote chronology and no-vig remain owned by `Daily-Data-Core`.
-
-## B.2-C C1 — current evidence
-
-The successful V3 run measured completed 2024 as:
+Final 2024 V4 evidence:
 
 ```text
 CFBD FBS-involved events                 920
 SportsDataverse/ESPN events              966
 exact shared event IDs                    920
 normalized ESPN FBS-involved events      920
-normalized overlap with CFBD              920
+normalized exact overlap                  920
 normalized CFBD-only                        0
 normalized ESPN-only                        0
+
+SAME_SIDE                                 918
+SWAPPED_SIDES                               2
+UNRESOLVED                                  0
+AMBIGUOUS                                   0
+counterpart-anchor alignments                2
+
+week MATCH                                920
+score MATCH                               919
+score UNAVAILABLE                           1
+score MISMATCH                              0
+lifecycle MATCH                           920
+
+participant observations                 1840
+unique CFBD team names                    230
+unique ESPN team IDs                      230
+team-ID crosswalk conflicts                 0
 ```
 
-This is strong empirical evidence that measured CFBD game IDs and SportsDataverse/ESPN `game_id` values share the ESPN event-ID namespace for the complete 2024 FBS-involved universe.
-
-### Provider home/away is not canonical identity
-
-V3 correctly resolved provider-side reversals in:
+Frozen rules include:
 
 ```text
-401677085  UTSA / Coastal Carolina
-401677093  USC / Texas A&M
-```
-
-After participant alignment, both scores match.
-
-Locked:
-
-```text
-same event + same participant set + swapped provider sides != identity conflict
 provider home/away side != canonical participant identity
+scores are compared only after participant alignment
+provider season totals require event-universe normalization
 ```
 
-### Final V3 edge case
+Inside an exact-ID matched two-participant event, one independently strong participant alignment may anchor the remaining participant by elimination only when there is no competing opposite-orientation evidence.
 
-V3 left only two unresolved orientations:
+The two event-local counterpart-anchor cases were the CFBD `Saint Francis` vs ESPN `St. Francis (PA) Red Flash` games. No global alias was invented.
+
+References:
+
+- [`docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md`](./docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V14.md`](./docs/data/PROVIDER_PROBE_RESULTS_V14.md)
+
+## C2 program/team provider crosswalk — active
+
+C2 now tests whether CFBD team IDs and independently derived ESPN team IDs are the same provider-ID namespace across completed 2023–2025 while preserving canonical Daily-NCAAF `PROGRAM_ID` separately.
+
+It measures:
 
 ```text
-401644732  Kent State vs Saint Francis
-401644737  Eastern Michigan vs Saint Francis
+FBS schedule-crosswalk coverage
+CFBD /teams/fbs id == derived ESPN team_id
+within-season ID collisions
+cross-season provider-ID stability
+name evolution on stable provider IDs
+FBS membership transitions
 ```
 
-CFBD calls the opponent `Saint Francis`; ESPN/SportsDataverse calls it `St. Francis (PA) Red Flash`. In both exact-ID events the other participant is independently aligned.
+2026 is intentionally excluded from the completed-season freeze window because the SportsDataverse schedule remains an acquisition-state subset.
 
-V4 therefore adds a conservative **counterpart-anchor** rule:
+References:
 
-```text
-EXACT EVENT ID
-+ exactly two participants
-+ one strong participant alignment
-+ no competing opposite-orientation anchor
-=> align the remaining participant by elimination
-```
+- [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
+- [`docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_PLAN_V1.md`](./docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_PLAN_V1.md)
+- [`scripts/probes/cross_provider_team_crosswalk_probe.py`](./scripts/probes/cross_provider_team_crosswalk_probe.py)
+- [`tests/probes/test_cross_provider_team_crosswalk_probe.py`](./tests/probes/test_cross_provider_team_crosswalk_probe.py)
 
-This is not a hard-coded alias table and may not override competing identity evidence.
+## Important temporal evidence retained outside C1
 
-### V3 2024 field agreement
+The 2024 providers still disagree on kickoff timestamps for 15 events by more than 60 seconds, ranging from minutes to many hours. These remain provider-time semantic observations rather than identity failures.
 
-```text
-week MATCH                     920
-kickoff <= 60 seconds          905
-kickoff > 60 seconds            15
-lifecycle MATCH                920
-score MATCH                    917
-score UNAVAILABLE                1
-score UNRESOLVED_ORIENTATION     2
-score MISMATCH                   0
-team crosswalk conflicts         0
-```
-
-The 15 kickoff differences remain source-time semantic evidence until scheduled/revised/actual-start meaning is proven.
-
-### 2026 acquisition-state evidence
-
-At V3 acquisition:
-
-```text
-CFBD season events                    888
-SportsDataverse/ESPN events             8
-exact shared event IDs                  8
-ESPN-only                                0
-```
-
-All eight shared kickoff times matched. Three exact shared games were already final in CFBD while the immutable SportsDataverse artifact still contained `STATUS_IN_PROGRESS` and intermediate scores.
+The 2026 schedule comparison also showed three exact shared games already final in CFBD while the immutable SportsDataverse asset still carried `STATUS_IN_PROGRESS` with intermediate scores.
 
 Locked:
 
@@ -145,16 +121,6 @@ current provider snapshot != final season truth
 provider update cadence is source-specific
 source hash + acquired_at are mandatory
 ```
-
-### Active C1 V4 references
-
-- [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V13.md`](./docs/data/PROVIDER_PROBE_RESULTS_V13.md)
-- [`docs/data/B2C_GAME_RECONCILIATION_FOLLOWUP_V3.md`](./docs/data/B2C_GAME_RECONCILIATION_FOLLOWUP_V3.md)
-- [`scripts/probes/cross_provider_game_reconciliation_probe_v4.py`](./scripts/probes/cross_provider_game_reconciliation_probe_v4.py)
-- [`tests/probes/test_cross_provider_game_reconciliation_probe_v4.py`](./tests/probes/test_cross_provider_game_reconciliation_probe_v4.py)
-
-If V4 resolves the two Saint Francis cases with explicit counterpart-anchor evidence while preserving 920/920 normalized event overlap and zero team-ID conflicts, **C1 can freeze**. Work then advances to **C2 program/team provider crosswalk freeze** and **C3 player cross-provider reconciliation**.
 
 ## Architecture
 
