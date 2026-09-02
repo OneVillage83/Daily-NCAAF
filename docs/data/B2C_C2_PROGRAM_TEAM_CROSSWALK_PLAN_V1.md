@@ -1,22 +1,16 @@
 # B.2-C C2 — Program / Team Provider Crosswalk Plan V1
 
-Status: **ACTIVE**
+Status: **COMPLETE / FROZEN**
 
 Prerequisite: `B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md` is frozen.
+
+Freeze authority: `B2C_C2_PROGRAM_TEAM_CROSSWALK_FREEZE_V1.md`.
 
 ## Objective
 
 Determine whether CFBD team IDs and ESPN/SportsDataverse team IDs can be used as strong direct provider crosswalk evidence across completed seasons, while preserving Daily-NCAAF canonical `PROGRAM` identity independently of either provider.
 
-C2 must answer:
-
-1. Does each FBS program returned by `GET /teams/fbs?year=` appear in the participant-aligned ESPN schedule crosswalk for the same completed season?
-2. When exactly one ESPN team ID is derived for a CFBD program, does it equal CFBD's own team `id`?
-3. Does a stable CFBD program name retain one provider ID across seasons?
-4. Does one provider ID ever map to multiple CFBD names across seasons, indicating rename/evolution evidence requiring explicit treatment?
-5. Do FBS entry/exit transitions remain membership-state changes rather than identity changes?
-
-## Initial completed-season window
+## Audited completed-season window
 
 ```text
 2023
@@ -24,66 +18,41 @@ C2 must answer:
 2025
 ```
 
-These seasons deliberately span recent FBS membership transitions while avoiding treating the partial 2026 SportsDataverse schedule as final coverage evidence.
+2026 was intentionally excluded from the completed-season freeze because its SportsDataverse schedule remained an acquisition-state subset.
 
-2026 remains a current-state observation and may be added later only as a snapshot stratum.
+## Completed result
 
-## Inputs
-
-### CFBD
-
-- `GET /teams/fbs?year=<season>`
-- `GET /games?year=<season>&seasonType=both&classification=fbs` through the frozen C1 reconciliation harness
-
-### SportsDataverse / ESPN
-
-- manifest-discovered `espn_cfb_schedules` season asset
-- exact event IDs and participant-aligned ESPN team IDs through C1 V4 semantics
-
-## Required per-season evidence
+The probe passed all 11 tests and measured:
 
 ```text
-FBS team rows
-unique CFBD school names
-unique CFBD team IDs
-duplicate school names
-duplicate team IDs
-participant-derived ESPN crosswalk coverage
-FBS schools missing schedule-derived crosswalk
-CFBD team-ID == derived ESPN team-ID count
-CFBD team-ID != derived ESPN team-ID examples
-within-season CFBD-name -> multiple ESPN-ID conflicts
-within-season ESPN-ID -> multiple CFBD-name conflicts
+2023: 133 / 133 FBS programs mapped; 133 direct ID matches
+2024: 134 / 134 FBS programs mapped; 134 direct ID matches
+2025: 136 / 136 FBS programs mapped; 136 direct ID matches
 ```
 
-## Required cross-season evidence
+Every mapped CFBD `/teams/fbs` team `id` equaled the independently derived ESPN `team_id`.
 
-For each observed FBS school name:
+Across the full window:
 
 ```text
-seasons observed
-CFBD IDs observed
-ESPN IDs observed
-display names observed
+unique FBS school names                         136
+unique CFBD team IDs                            136
+unique ESPN team IDs                            136
+same CFBD school -> multiple provider IDs         0
+same ESPN ID -> multiple CFBD names               0
+same CFBD ID -> multiple CFBD names               0
 ```
-
-Report separately:
-
-```text
-same CFBD name -> multiple provider IDs
-same ESPN ID -> multiple CFBD names
-same CFBD ID -> multiple CFBD names
-```
-
-Multiple names on one stable provider ID are **name-evolution candidates**, not automatic canonical merges.
 
 ## Membership transitions
 
-For each adjacent season pair report:
-
 ```text
-entered_fbs
-exited_fbs
+2023 -> 2024
+entered_fbs: Kennesaw State
+exited_fbs: none
+
+2024 -> 2025
+entered_fbs: Delaware, Missouri State
+exited_fbs: none
 ```
 
 Locked interpretation:
@@ -93,24 +62,59 @@ FBS membership change != new PROGRAM identity
 classification stint != provider team identity
 ```
 
-## C2 safety rules
+## Display-name evolution
+
+One measured example retained external team ID `2026` while ESPN display text evolved from `Appalachian State Mountaineers` to `App State Mountaineers`.
+
+Locked:
+
+```text
+provider display-name change != identity change
+name equality != canonical identity proof
+name inequality != identity break
+```
+
+## Frozen provider-ID interpretation
+
+For the measured 2023-2025 FBS universe:
+
+```text
+CFBD team id == ESPN team id
+```
+
+This is strong evidence of a shared external numeric team-ID namespace in the audited window.
+
+It does **not** make the external ID canonical Daily-NCAAF identity.
 
 ```text
 provider team ID != canonical PROGRAM_ID
-name equality != canonical identity proof
-name inequality != identity break
-classification change != identity break
-same provider ID + changed name = investigate/record evolution; do not silently rewrite history
 ```
 
-## C2 freeze candidate criteria
+Source provenance remains mandatory even when two sources expose the same external value.
 
-C2 can become a freeze candidate if completed 2023–2025 demonstrate:
+## Phase C consequence
 
-1. complete or explicitly explained FBS schedule-derived crosswalk coverage;
-2. no unresolved within-season team-ID collisions;
-3. direct CFBD team IDs agree with independently derived ESPN IDs wherever both are present, or every disagreement is individually explained;
-4. cross-season ID changes/renames are surfaced explicitly rather than hidden by normalization;
-5. membership transitions are represented separately from identity.
+Minimum provider-independent program identity architecture remains:
 
-C2 does not make either provider's ID canonical. It establishes provider-crosswalk strength and the evidence needed for the Phase C `PROGRAM_PROVIDER_CROSSWALK` contract.
+```text
+PROGRAM
+PROGRAM_SEASON
+CLASSIFICATION_STINT
+CONFERENCE_AFFILIATION_STINT
+PROGRAM_PROVIDER_IDENTIFIER / PROVIDER_IDENTIFIER_OBSERVATION
+```
+
+Provider-identifier observations retain namespace, value, source, acquired-at evidence and valid intervals where defensible.
+
+## Freeze evidence
+
+- `PROVIDER_PROBE_RESULTS_V15.md`
+- `B2C_C2_PROGRAM_TEAM_CROSSWALK_FREEZE_V1.md`
+- `scripts/probes/cross_provider_team_crosswalk_probe.py`
+- `tests/probes/test_cross_provider_team_crosswalk_probe.py`
+
+All predeclared C2 freeze criteria passed.
+
+## Next gate
+
+**B.2-C C3 — player cross-provider identity** is active.
