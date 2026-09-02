@@ -31,7 +31,8 @@ The repository is being built as a full production architecture from the beginni
 - **B.2-B — CFBD college-native family, era, scope and identity audit:** complete.
 - **B.2-C C1 — Game/event reconciliation:** **COMPLETE / FROZEN**.
 - **B.2-C C2 — Program/team provider crosswalk:** **COMPLETE / FROZEN**.
-- **B.2-C C3 — Player cross-provider identity:** **ACTIVE**.
+- **B.2-C C3-A — Targeted player cross-provider identity:** **COMPLETE**.
+- **B.2-C C3-B — Player breadth/coverage reconciliation:** **ACTIVE**.
 - **B.2-D — Prospective live revision/PIT capture:** still required.
 - **B.2-E — Availability-source trials:** still required.
 
@@ -97,27 +98,79 @@ References:
 
 ## C3 player cross-provider identity — active
 
-SportsDataverse publishes an ESPN-derived roster family with explicit athlete identifiers. C3-A compares those roster `athlete_id` values against CFBD roster IDs for previously proven continuity cases and measures full athlete-ID overlap in every surrounding team-season roster slice.
+### C3-A targeted identity — complete
 
-Initial targets:
+The user-executed C3-A suite passed all 11 tests.
+
+Target continuity results:
 
 ```text
-Jalen Milroe     4432734
-Dillon Gabriel   4427238
-Travis Hunter    4685415
-Caleb Downs      4870706
+Jalen Milroe 4432734
+  Alabama 2023     DIRECT_SHARED_PROVIDER_ID
+  Alabama 2024     DIRECT_SHARED_PROVIDER_ID
+
+Dillon Gabriel 4427238
+  Oklahoma 2022    DIRECT_SHARED_PROVIDER_ID
+  Oklahoma 2023    DIRECT_SHARED_PROVIDER_ID
+  Oregon 2024      DIRECT_SHARED_PROVIDER_ID
+
+Caleb Downs 4870706
+  Alabama 2023     DIRECT_SHARED_PROVIDER_ID
+  Ohio State 2024  DIRECT_SHARED_PROVIDER_ID
+  Ohio State 2025  DIRECT_SHARED_PROVIDER_ID
+
+Travis Hunter 4685415
+  Jackson State 2022  CFBD_ONLY_IDENTIFIER
+  Colorado 2023       DIRECT_SHARED_PROVIDER_ID
+  Colorado 2024       DIRECT_SHARED_PROVIDER_ID
 ```
 
-The selected cases cover same-program seasons, FBS transfers, an FCS→FBS move and post-transfer continuity.
+Hunter's 2022 result is a source-coverage gap: the SportsDataverse roster asset contained zero Jackson State rows, so it is not an athlete-ID disagreement.
 
-Names are candidate-discovery diagnostics only. They can never repair an identifier disagreement.
+Across the nine measured FBS roster slices:
+
+```text
+CFBD unique athlete IDs        1111
+ESPN unique athlete IDs        1111
+exact shared athlete IDs       1099
+CFBD-only IDs                    12
+ESPN-only IDs                    12
+weighted exact-ID overlap     98.92% / 98.92%
+duplicate-ID slices              0
+```
+
+This strongly supports a shared recent-FBS external athlete-ID namespace while separately proving that roster coverage is not perfectly identical.
+
+Same-ID display-name differences were common enough to reinforce:
+
+```text
+name inequality != identity break
+name matching remains diagnostic only
+```
 
 References:
 
-- [`docs/implementation/CURRENT_PHASE.md`](./docs/implementation/CURRENT_PHASE.md)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V16.md`](./docs/data/PROVIDER_PROBE_RESULTS_V16.md)
 - [`docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_PLAN_V1.md`](./docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_PLAN_V1.md)
 - [`scripts/probes/cross_provider_player_identity_probe.py`](./scripts/probes/cross_provider_player_identity_probe.py)
-- [`tests/probes/test_cross_provider_player_identity_probe.py`](./tests/probes/test_cross_provider_player_identity_probe.py)
+
+### C3-B breadth / coverage — active
+
+Before freezing C3 globally, a deterministic 13-slice breadth pass tests whether the C3-A overlap generalizes across conference, independent, service-academy, realignment and recent-FBS-entry contexts.
+
+```text
+2024: Clemson, Michigan, Utah, Georgia, Army, Kennesaw State,
+      Toledo, Boise State, App State, Oregon State, Notre Dame
+2025: Delaware, Missouri State
+```
+
+References:
+
+- [`docs/data/B2C_C3_PLAYER_COVERAGE_BREADTH_PLAN_V1.md`](./docs/data/B2C_C3_PLAYER_COVERAGE_BREADTH_PLAN_V1.md)
+- [`scripts/probes/cross_provider_player_coverage_probe.py`](./scripts/probes/cross_provider_player_coverage_probe.py)
+- [`tests/probes/test_cross_provider_player_coverage_probe.py`](./tests/probes/test_cross_provider_player_coverage_probe.py)
+
+C3 freeze will be an identity/crosswalk freeze, not a claim that either provider roster is population-complete.
 
 ## Temporal evidence retained outside identity freezes
 
