@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. Phase B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity is COMPLETE/FROZEN and C2 program/team provider-crosswalk stability is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
+**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity and C2 program/team provider crosswalk are COMPLETE/FROZEN; C3 player cross-provider identity is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
 
 ---
 
@@ -56,151 +56,161 @@ Freeze contract:
 docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md
 ```
 
-Final evidence:
-
-```text
-docs/data/PROVIDER_PROBE_RESULTS_V14.md
-```
-
-The user-executed V4 suite passed all 10 tests.
-
-### Completed 2024 freeze evidence
+Final completed-2024 evidence:
 
 ```text
 CFBD FBS-involved events                 920
 SportsDataverse/ESPN events              966
 exact shared event IDs                    920
-normalized ESPN FBS-involved events      920
-normalized exact overlap                  920
+normalized exact overlap                  920 / 920
 normalized CFBD-only                        0
 normalized ESPN-only                        0
-
 SAME_SIDE                                 918
 SWAPPED_SIDES                               2
 UNRESOLVED                                  0
 AMBIGUOUS                                   0
-
-ONE_PARTICIPANT_EXACT_EVENT_COUNTERPART_ANCHOR  2
-
-week MATCH                                920
 score MATCH                               919
 score UNAVAILABLE                           1
 score MISMATCH                              0
-lifecycle MATCH                           920
-
-participant observations                 1840
-unique CFBD team names                    230
-unique ESPN team IDs                      230
-CFBD-name -> multiple ESPN-ID conflicts     0
-ESPN-ID -> multiple CFBD-name conflicts     0
-matched games skipped                       0
+week MATCH                                920
+team-ID crosswalk conflicts                 0
 ```
 
-The single unavailable score is the real Liberty-at-App-State cancellation.
+Provider home/away side is not canonical identity. Exact-event counterpart anchoring is permitted only when one participant is strongly aligned and the opposite orientation has no competing identity evidence.
 
-### Frozen C1 identity rules
+Kickoff discrepancies remain temporal-semantics evidence, not identity failures.
+
+---
+
+## C2 — Program / team provider crosswalk — COMPLETE / FROZEN
+
+Freeze contract:
 
 ```text
-provider home/away side != canonical participant identity
-same exact event + same participant set + swapped provider sides != identity conflict
-scores are compared only after participant alignment
-provider season totals are compared only after event-universe normalization
+docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_FREEZE_V1.md
 ```
 
-Inside an exact-ID matched two-participant event:
+Evidence:
 
 ```text
-one strong participant alignment
-+ no competing opposite-orientation anchor
-=> remaining participant may be aligned by counterpart elimination
+docs/data/PROVIDER_PROBE_RESULTS_V15.md
 ```
 
-This resolved the two `Saint Francis` vs `St. Francis (PA) Red Flash` events without creating a global alias rule.
+The user-executed C2 suite passed all 11 tests.
 
-### Kickoff semantics remain separate
-
-2024 V4 kickoff deltas:
+### Completed-season evidence
 
 ```text
-<= 60 seconds             905
-> 60 sec <= 5 min           1
-> 5 min <= 30 min            6
-> 30 min <= 2 hours          6
-> 2 hours                     2
+2023
+FBS programs                         133
+schedule-derived ESPN mappings      133
+coverage                            100%
+CFBD id == ESPN id                  133
+mismatches                            0
+
+2024
+FBS programs                         134
+schedule-derived ESPN mappings      134
+coverage                            100%
+CFBD id == ESPN id                  134
+mismatches                            0
+
+2025
+FBS programs                         136
+schedule-derived ESPN mappings      136
+coverage                            100%
+CFBD id == ESPN id                  136
+mismatches                            0
 ```
 
-These remain provider-time semantic observations, not C1 identity failures.
-
-### 2026 remains acquisition-state evidence
-
-At V4 acquisition:
+Cross-season:
 
 ```text
-CFBD season events                    888
-SportsDataverse/ESPN events             8
-exact shared event IDs                  8
-ESPN-only                                0
+unique FBS school names                        136
+unique CFBD team IDs                           136
+unique ESPN team IDs                           136
+same school -> multiple provider IDs             0
+same ESPN ID -> multiple CFBD school names       0
+same CFBD ID -> multiple CFBD school names       0
 ```
 
-Three shared events were final in CFBD while the immutable SportsDataverse asset still carried `STATUS_IN_PROGRESS` and intermediate scores.
+The measured CFBD and ESPN-derived sources therefore expose the same numeric external team-ID namespace across the audited 2023-2025 FBS window.
 
 Locked:
 
 ```text
-current provider snapshot != final season truth
-provider update cadence is source-specific
-source hash + acquired_at are mandatory
+external team ID != canonical PROGRAM_ID
+provider display-name change != identity change
+FBS membership transition != new PROGRAM identity
 ```
 
-This supports B.2-D but does not replace prospective repeated live capture.
+Measured FBS entries:
+
+```text
+2024: Kennesaw State
+2025: Delaware, Missouri State
+```
+
+`App State` also demonstrated benign provider display-name evolution while external ID `2026` remained stable.
 
 ---
 
-## C2 — Program / team provider crosswalk — ACTIVE
+## C3 — Player cross-provider identity — ACTIVE
 
 Plan:
 
 ```text
-docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_PLAN_V1.md
+docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_PLAN_V1.md
 ```
 
 Tooling:
 
 ```text
-scripts/probes/cross_provider_team_crosswalk_probe.py
-tests/probes/test_cross_provider_team_crosswalk_probe.py
+scripts/probes/cross_provider_player_identity_probe.py
+tests/probes/test_cross_provider_player_identity_probe.py
 ```
 
-Initial completed-season window:
+### Initial targeted identities
 
 ```text
-2023
-2024
-2025
+Jalen Milroe     4432734
+Dillon Gabriel   4427238
+Travis Hunter    4685415
+Caleb Downs      4870706
 ```
 
-C2 uses the frozen C1 participant-aligned schedule crosswalk and independently fetches CFBD `/teams/fbs?year=`. It measures:
+The C3-A probe compares exact athlete identifiers in CFBD rosters against ESPN-derived SportsDataverse season rosters and also measures complete athlete-ID overlap for every surrounding team-season roster slice.
+
+Targeted continuity includes:
 
 ```text
-FBS schedule-crosswalk coverage
-CFBD team id == derived ESPN team id
-within-season ID collisions
-same school name -> multiple provider IDs across seasons
-same provider ID -> multiple school names across seasons
-FBS membership entry/exit transitions
+same-program continuity
+FBS -> FBS transfers
+FCS -> FBS movement
+multi-season post-transfer continuity
 ```
 
-Provider IDs remain crosswalks, never canonical `PROGRAM_ID` values.
+Names are diagnostic candidate discovery only and never identity authority.
 
-C2 freeze requires complete or explicitly explained completed-season coverage, no unresolved within-season collisions, and direct provider-ID disagreements to be individually explained rather than normalized away.
+Required identity states remain explicit:
+
+```text
+DIRECT_SHARED_PROVIDER_ID
+CFBD_ONLY_IDENTIFIER
+ESPN_ONLY_IDENTIFIER
+IDENTIFIER_DISAGREEMENT
+AMBIGUOUS_NAME_CANDIDATES
+UNRESOLVED
+```
+
+SportsDataverse roster assets are manifest-selected and immutable audit evidence records include source hash, advertised digest and acquired-at time.
 
 ---
 
-## C3-C6 — queued after C2
+## C4-C6 — queued after C3
 
 ```text
-C3 player cross-provider identity
-C4 transfer continuity across providers
+C4 transfer continuity / broader player reconciliation if C3-A requires expansion
 C5 venue/conference/context agreement
 C6 selected play-level reconciliation
 ```
@@ -220,6 +230,8 @@ payload/record hash
 revision delta
 correction time
 ```
+
+The 2026 source-state lag observed during C1 supports this gate but does not replace prospective repeated capture.
 
 ## B.2-E — Availability-source trial — QUEUED
 
