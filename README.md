@@ -31,8 +31,8 @@ The repository is being built as a full production architecture from the beginni
 - **B.2-B — CFBD college-native family, era, scope and identity audit:** complete.
 - **B.2-C C1 — Game/event reconciliation:** **COMPLETE / FROZEN**.
 - **B.2-C C2 — Program/team provider crosswalk:** **COMPLETE / FROZEN**.
-- **B.2-C C3-A — Targeted player cross-provider identity:** **COMPLETE**.
-- **B.2-C C3-B — Player breadth/coverage reconciliation:** **ACTIVE**.
+- **B.2-C C3 — Player cross-provider identity:** **COMPLETE / FROZEN**.
+- **B.2-C C4 — Transfer-event reconciliation:** **ACTIVE**.
 - **B.2-D — Prospective live revision/PIT capture:** still required.
 - **B.2-E — Availability-source trials:** still required.
 
@@ -55,128 +55,99 @@ score UNAVAILABLE               1
 score MISMATCH                  0
 ```
 
-Provider home/away side is not canonical identity. Scores are compared only after participant alignment. Event-universe normalization precedes provider season-count comparison.
-
-References:
-
-- [`docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md`](./docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V14.md`](./docs/data/PROVIDER_PROBE_RESULTS_V14.md)
+Provider home/away side is not canonical identity. Scores are compared only after participant alignment.
 
 ## C2 program/team provider crosswalk — frozen
 
 Completed 2023-2025 measured 100% FBS schedule-derived team crosswalk coverage and exact direct external-ID equality in every program-season:
 
 ```text
-2023  133 / 133 direct CFBD-ID == ESPN-ID matches
-2024  134 / 134 direct CFBD-ID == ESPN-ID matches
-2025  136 / 136 direct CFBD-ID == ESPN-ID matches
+2023  133 / 133
+2024  134 / 134
+2025  136 / 136
 ```
 
-Cross-season:
+The audited CFBD and ESPN-derived sources expose the same numeric external team-ID namespace over the measured window, but that value never becomes canonical Daily-NCAAF `PROGRAM_ID`.
+
+## C3 player cross-provider identity — frozen
+
+C3-A targeted transfer/same-program continuity plus C3-B's deterministic breadth sample establish a dominant shared recent-FBS external athlete-ID namespace while keeping roster coverage separate from identity.
+
+Across the 22 measured FBS team-season slices:
 
 ```text
-136 unique FBS school names
-136 unique CFBD team IDs
-136 unique ESPN team IDs
-0 same-school multi-ID cases
-0 reverse-ID collisions
+CFBD athlete-ID observations       2745
+ESPN athlete-ID observations       2749
+exact shared observations          2715
+combined weighted CFBD overlap   98.9071%
+combined weighted ESPN overlap   98.7632%
 ```
 
-Measured membership transitions remain program state, not identity replacement:
+C3-B alone measured:
 
 ```text
-2024: Kennesaw State enters FBS
-2025: Delaware and Missouri State enter FBS
+13 non-empty FBS slices
+4 complete exact-set matches
+7 high-overlap slices
+2 partial-overlap slices
+0 zero-team-row slices
+0 duplicate-ID slices
 ```
 
-The audited CFBD and ESPN-derived sources expose the same numeric external team-ID namespace over the measured window, but that external value never becomes canonical Daily-NCAAF `PROGRAM_ID`.
+The weakest provider-side coverage observations were Georgia 2024 from the CFBD side and Utah 2024 from the ESPN side. They remained coverage differences rather than contradictory same-ID mappings.
 
-References:
-
-- [`docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_FREEZE_V1.md`](./docs/data/B2C_C2_PROGRAM_TEAM_CROSSWALK_FREEZE_V1.md)
-- [`docs/data/PROVIDER_PROBE_RESULTS_V15.md`](./docs/data/PROVIDER_PROBE_RESULTS_V15.md)
-
-## C3 player cross-provider identity — active
-
-### C3-A targeted identity — complete
-
-The user-executed C3-A suite passed all 11 tests.
-
-Target continuity results:
+Frozen:
 
 ```text
-Jalen Milroe 4432734
-  Alabama 2023     DIRECT_SHARED_PROVIDER_ID
-  Alabama 2024     DIRECT_SHARED_PROVIDER_ID
-
-Dillon Gabriel 4427238
-  Oklahoma 2022    DIRECT_SHARED_PROVIDER_ID
-  Oklahoma 2023    DIRECT_SHARED_PROVIDER_ID
-  Oregon 2024      DIRECT_SHARED_PROVIDER_ID
-
-Caleb Downs 4870706
-  Alabama 2023     DIRECT_SHARED_PROVIDER_ID
-  Ohio State 2024  DIRECT_SHARED_PROVIDER_ID
-  Ohio State 2025  DIRECT_SHARED_PROVIDER_ID
-
-Travis Hunter 4685415
-  Jackson State 2022  CFBD_ONLY_IDENTIFIER
-  Colorado 2023       DIRECT_SHARED_PROVIDER_ID
-  Colorado 2024       DIRECT_SHARED_PROVIDER_ID
-```
-
-Hunter's 2022 result is a source-coverage gap: the SportsDataverse roster asset contained zero Jackson State rows, so it is not an athlete-ID disagreement.
-
-Across the nine measured FBS roster slices:
-
-```text
-CFBD unique athlete IDs        1111
-ESPN unique athlete IDs        1111
-exact shared athlete IDs       1099
-CFBD-only IDs                    12
-ESPN-only IDs                    12
-weighted exact-ID overlap     98.92% / 98.92%
-duplicate-ID slices              0
-```
-
-This strongly supports a shared recent-FBS external athlete-ID namespace while separately proving that roster coverage is not perfectly identical.
-
-Same-ID display-name differences were common enough to reinforce:
-
-```text
+shared external athlete ID = strong provider-crosswalk identity evidence
+provider athlete ID != canonical PLAYER_ID
+provider-only roster row != identity disagreement
+provider roster membership != canonical PLAYER_PROGRAM_STINT truth
+missing provider row != player absence
 name inequality != identity break
-name matching remains diagnostic only
+shared cross-provider ID != historical PIT safety
 ```
+
+Target transfer continuity included Dillon Gabriel and Caleb Downs with the same direct shared athlete IDs before and after FBS program changes. Travis Hunter's 2022 Jackson State SportsDataverse roster remains a documented source-coverage gap rather than an identity conflict.
 
 References:
 
+- [`docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_FREEZE_V1.md`](./docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_FREEZE_V1.md)
 - [`docs/data/PROVIDER_PROBE_RESULTS_V16.md`](./docs/data/PROVIDER_PROBE_RESULTS_V16.md)
-- [`docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_PLAN_V1.md`](./docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_PLAN_V1.md)
-- [`scripts/probes/cross_provider_player_identity_probe.py`](./scripts/probes/cross_provider_player_identity_probe.py)
+- [`docs/data/PROVIDER_PROBE_RESULTS_V17.md`](./docs/data/PROVIDER_PROBE_RESULTS_V17.md)
 
-### C3-B breadth / coverage — active
+## C4 transfer-event reconciliation — active
 
-Before freezing C3 globally, a deterministic 13-slice breadth pass tests whether the C3-A overlap generalizes across conference, independent, service-academy, realignment and recent-FBS-entry contexts.
+C4 now reconciles identifier-less CFBD portal observations against the frozen C2 program and C3 player identities plus surrounding CFBD/ESPN roster stints.
+
+Initial events:
 
 ```text
-2024: Clemson, Michigan, Utah, Georgia, Army, Kennesaw State,
-      Toledo, Boise State, App State, Oregon State, Notre Dame
-2025: Delaware, Missouri State
+Dillon Gabriel  UCF 2021 -> Oklahoma 2022
+Dillon Gabriel  Oklahoma 2023 -> Oregon 2024
+Travis Hunter   Jackson State 2022 -> Colorado 2023
+Caleb Downs     Alabama 2023 -> Ohio State 2024
+```
+
+The portal row itself is contextual evidence, not identity authority.
+
+```text
+portal name match != PLAYER identity
+portal origin/destination != canonical stint by itself
+transferDate != publication time
 ```
 
 References:
 
-- [`docs/data/B2C_C3_PLAYER_COVERAGE_BREADTH_PLAN_V1.md`](./docs/data/B2C_C3_PLAYER_COVERAGE_BREADTH_PLAN_V1.md)
-- [`scripts/probes/cross_provider_player_coverage_probe.py`](./scripts/probes/cross_provider_player_coverage_probe.py)
-- [`tests/probes/test_cross_provider_player_coverage_probe.py`](./tests/probes/test_cross_provider_player_coverage_probe.py)
-
-C3 freeze will be an identity/crosswalk freeze, not a claim that either provider roster is population-complete.
+- [`docs/data/B2C_C4_TRANSFER_EVENT_RECONCILIATION_PLAN_V1.md`](./docs/data/B2C_C4_TRANSFER_EVENT_RECONCILIATION_PLAN_V1.md)
+- [`scripts/probes/cross_provider_transfer_event_probe.py`](./scripts/probes/cross_provider_transfer_event_probe.py)
+- [`tests/probes/test_cross_provider_transfer_event_probe.py`](./tests/probes/test_cross_provider_transfer_event_probe.py)
 
 ## Temporal evidence retained outside identity freezes
 
 The 2024 providers still disagree on kickoff timestamps for 15 events by more than 60 seconds. These remain provider-time semantic observations rather than identity failures.
 
-The 2026 comparison also showed exact shared games already final in CFBD while the immutable SportsDataverse schedule asset still carried `STATUS_IN_PROGRESS` with intermediate scores.
+The 2026 comparison also showed exact shared games already final in CFBD while an immutable SportsDataverse schedule asset still carried `STATUS_IN_PROGRESS` with intermediate scores.
 
 Locked:
 
@@ -192,22 +163,22 @@ The governing architecture lives in [`docs/architecture`](./docs/architecture) a
 
 ```text
 LAYER 1 — TRUTH & EVIDENCE
-F-0 → F-5
+F-0 -> F-5
 
 LAYER 2 — FOOTBALL STATE
-F-6 → F-12
+F-6 -> F-12
 
 LAYER 3 — FEATURES & TARGETS
-F-13 → F-14
+F-13 -> F-14
 
 LAYER 4 — MODELING & SIMULATION
-F-15 → F-17
+F-15 -> F-17
 
 LAYER 5 — MARKET / RECOMMENDATION / LEARNING
-F-18 → F-21
+F-18 -> F-21
 
 LAYER 6 — NCAAF EXTENSIONS & FUTURE RESEARCH
-F-22 → F-24
+F-22 -> F-24
 ```
 
 Architecture changes must be versioned rather than silently rewriting the meaning of an already-locked version.
