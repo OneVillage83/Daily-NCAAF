@@ -33,7 +33,7 @@ The repository is being built as a full production architecture from the beginni
 - **B.2-C C2 — Program/team provider crosswalk:** **COMPLETE / FROZEN**.
 - **B.2-C C3 — Player cross-provider identity:** **COMPLETE / FROZEN**.
 - **B.2-C C4 — Transfer-event reconciliation:** **COMPLETE / FROZEN**.
-- **B.2-C C5 — Venue/conference/context reconciliation:** **ACTIVE**.
+- **B.2-C C5 — Venue/conference/context reconciliation:** **ACTIVE — C5-A measured/partial, C5-B active**.
 - **B.2-D — Prospective live revision/PIT capture:** still required.
 - **B.2-E — Availability-source trials:** still required.
 
@@ -143,26 +143,82 @@ References:
 
 ## C5 venue/conference/context reconciliation — active
 
-C5 compares completed 2023-2025 exact-ID matched events after applying the frozen C1 participant orientation.
+### C5-A — native schedule context — measured / partial
 
-Fields:
+The user-executed C5-A suite passed all 11 tests and retained 100% CFBD-side exact event coverage across the completed 2023-2025 window.
 
 ```text
-CFBD venueId <-> ESPN-native venue_id
-venue display text
-neutralSite <-> neutral_site
-participant classification <-> aligned division
-participant conference <-> aligned conference
-conferenceGame <-> conference_competition
+2023  910 / 910
+2024  920 / 920
+2025  934 / 934
 ```
 
-`conferenceGame` and `conference_competition` remain separate semantics when they disagree. Venue IDs, conference labels and classification labels are provider observations/crosswalk evidence, not canonical identifiers by themselves.
+The selected `espn_cfb_schedules` CSVs do **not** expose event `venue_id` or participant conference/division columns. Those V1 states are therefore `UNAVAILABLE`, not disagreements.
+
+Usable C5-A context:
+
+```text
+venue display text
+2023  EXACT 815  MISMATCH 95
+2024  EXACT 830  MISMATCH 90
+2025  EXACT 827  MISMATCH 107
+
+neutral-site flag
+2023  MATCH 907  MISMATCH 3
+2024  MATCH 901  MISMATCH 19
+2025  MATCH 925  MISMATCH 9
+
+conference-game flag
+2023  MATCH 898  MISMATCH 12
+2024  MATCH 909  MISMATCH 11
+2025  MATCH 933  MISMATCH 1
+```
+
+Venue-name examples demonstrate sponsor/branding/history drift, so display text is not venue identity. Neutral-site disagreements remain provider observations. Conference-game flag mismatches concentrate in special semantic contexts such as championship and independent/Army-Navy cases and remain distinct from conference affiliation.
+
+Locked:
+
+```text
+field absent from source artifact != disagreement
+UNAVAILABLE != MISMATCH
+venue display text != venue identity
+conferenceGame != conference_competition semantics by definition
+```
 
 References:
 
+- [`docs/data/PROVIDER_PROBE_RESULTS_V19.md`](./docs/data/PROVIDER_PROBE_RESULTS_V19.md)
 - [`docs/data/B2C_C5_VENUE_CONFERENCE_CONTEXT_PLAN_V1.md`](./docs/data/B2C_C5_VENUE_CONFERENCE_CONTEXT_PLAN_V1.md)
-- [`scripts/probes/cross_provider_context_reconciliation_probe.py`](./scripts/probes/cross_provider_context_reconciliation_probe.py)
-- [`tests/probes/test_cross_provider_context_reconciliation_probe.py`](./tests/probes/test_cross_provider_context_reconciliation_probe.py)
+
+### C5-B — team-season context / home-venue anchor — active
+
+C5-B uses documented ESPN-native fields from the published `espn_cfb_teams` season table for the missing participant context:
+
+```text
+team_id
+division
+conference_*
+venue_id
+venue_name
+```
+
+That table also contains explicitly backported CFBD fields. The C5-B harness whitelists ESPN-native fields and refuses to use `cfbd_conference`, `classification`, or other backported CFBD fields as second-path evidence.
+
+It will compare participant classification and conference through the exact team IDs already established by C1/C2. ESPN team-season `venue_id` is used only as a conservative standard-home-venue anchor; a team home venue is never substituted for direct event venue identity.
+
+Locked distinction:
+
+```text
+HOME_VENUE_STINT != GAME_VENUE_OBSERVATION
+team-season home venue != event venue by definition
+CFBD-backported team columns != ESPN-native evidence
+```
+
+References:
+
+- [`docs/data/B2C_C5_CONTEXT_FOLLOWUP_PLAN_V1.md`](./docs/data/B2C_C5_CONTEXT_FOLLOWUP_PLAN_V1.md)
+- [`scripts/probes/cross_provider_context_reconciliation_probe_v2.py`](./scripts/probes/cross_provider_context_reconciliation_probe_v2.py)
+- [`tests/probes/test_cross_provider_context_reconciliation_probe_v2.py`](./tests/probes/test_cross_provider_context_reconciliation_probe_v2.py)
 
 ## Temporal evidence retained outside reconciliation freezes
 
