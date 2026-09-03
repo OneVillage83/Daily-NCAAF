@@ -1,6 +1,6 @@
 # B.2-C C3-B — Player Cross-Provider Breadth / Coverage Plan V1
 
-Status: **ACTIVE**
+Status: **COMPLETE**
 
 Prerequisites:
 
@@ -14,129 +14,107 @@ Determine whether the high exact athlete-ID overlap measured in C3-A generalizes
 
 C3-B is a deterministic breadth pass, not a full historical backfill.
 
-## Why this pass exists
-
-C3-A measured nine FBS team-season slices and found:
-
-```text
-1099 / 1111 exact shared athlete IDs
-98.92% weighted overlap on each provider side
-0 duplicate athlete IDs in measured FBS slices
-```
-
-However, those slices were concentrated around Alabama, Oklahoma, Colorado, Oregon and Ohio State. A broader conference/membership sample is required before freezing the player cross-provider contract.
-
 ## Deterministic sample
 
-### 2024 conference / structural strata
-
 ```text
-ACC          Clemson          team_id 228
-Big Ten      Michigan         team_id 130
-Big 12       Utah             team_id 254
-SEC          Georgia          team_id 61
-AAC          Army             team_id 349
-C-USA        Kennesaw State   team_id 338   # recent FBS entrant
-MAC          Toledo           team_id 2649
-Mountain West Boise State     team_id 68
-Sun Belt     App State        team_id 2026
-Pac-12       Oregon State     team_id 204
-Independent  Notre Dame       team_id 87
+2024: Clemson, Michigan, Utah, Georgia, Army, Kennesaw State,
+      Toledo, Boise State, App State, Oregon State, Notre Dame
+2025: Delaware, Missouri State
 ```
 
-### 2025 membership-transition strata
+The sample spans major-conference, Group-of-Five, independent, service-academy, recent-FBS-entry and conference-realignment contexts.
+
+## User-executed result
 
 ```text
-Delaware       team_id 48    # enters FBS in 2025
-Missouri State team_id 2623  # enters FBS in 2025
+10 tests
+OK
 ```
 
-The sample intentionally includes major-conference, Group-of-Five, independent, service-academy, recent-FBS-entry and conference-realignment contexts.
-
-## Inputs
-
-CFBD:
+Probe aggregate:
 
 ```text
-GET /roster?year=<season>&team=<team>&classification=fbs
+sample slices                              13
+compared non-empty slices                  13
+complete exact-ID set match slices          4
+high exact-ID overlap slices                7
+partial exact-ID overlap slices             2
+zero CFBD team-row slices                   0
+zero ESPN team-row slices                   0
+duplicate-ID slices                         0
+
+CFBD unique athlete IDs                  1634
+ESPN unique athlete IDs                  1638
+exact shared athlete IDs                 1616
+CFBD-only athlete IDs                      18
+ESPN-only athlete IDs                      22
+weighted CFBD overlap                  98.8984%
+weighted ESPN overlap                  98.6569%
+minimum CFBD slice overlap             94.1606%
+minimum ESPN slice overlap             88.6179%
 ```
 
-SportsDataverse / ESPN-derived:
+Detailed evidence:
 
 ```text
-espn_cfb_rosters season asset
+docs/data/PROVIDER_PROBE_RESULTS_V17.md
 ```
 
-The external team IDs are frozen C2 evidence.
+## Coverage interpretation
 
-## Required per-slice evidence
+Four slices were exact set matches:
 
 ```text
-CFBD roster rows
-ESPN roster rows
-CFBD unique athlete IDs
-ESPN unique athlete IDs
-exact shared athlete IDs
-CFBD-only athlete IDs
-ESPN-only athlete IDs
-CFBD exact-ID overlap rate
-ESPN exact-ID overlap rate
-duplicate athlete IDs
-same-ID display-name differences
+App State 2024
+Oregon State 2024
+Delaware 2025
+Missouri State 2025
 ```
 
-Coverage states:
+The lowest measured CFBD-side overlap was Georgia 2024 at `94.1606%`. The lowest ESPN-side overlap was Utah 2024 at `88.6179%` because ESPN exposed 14 athlete IDs not present in the CFBD slice.
+
+Neither case contained duplicate athlete IDs or a contradictory same-ID mapping.
+
+Locked:
 
 ```text
-COMPLETE_EXACT_ID_SET_MATCH
-HIGH_EXACT_ID_OVERLAP
-PARTIAL_EXACT_ID_OVERLAP
-NO_ESPN_TEAM_ROWS
-NO_CFBD_TEAM_ROWS
-UNRESOLVED
+provider-only roster row != identity disagreement
+provider roster membership != canonical PLAYER_PROGRAM_STINT truth
+missing provider row != player absence
 ```
 
-`HIGH_EXACT_ID_OVERLAP` is descriptive audit output, not an identity merge rule.
-
-## Aggregate evidence
-
-Across compared non-empty slices report:
+## C3-A + C3-B combined FBS evidence
 
 ```text
-slice count
-complete-set-equality slice count
-zero-ESPN-row slice count
-CFBD unique athlete IDs total
-ESPN unique athlete IDs total
-exact shared athlete IDs total
-CFBD-only total
-ESPN-only total
-weighted exact-ID overlap rates
-minimum per-slice overlap rates
-slices containing duplicate IDs
+team-season slices                        22
+CFBD athlete-ID observations            2745
+ESPN athlete-ID observations            2749
+exact shared athlete-ID observations   2715
+combined weighted CFBD overlap       98.9071%
+combined weighted ESPN overlap       98.7632%
 ```
+
+These are observation counts across slices, not globally unique-person counts.
 
 ## Safety rules
 
 ```text
 provider athlete ID != canonical PLAYER_ID
-provider-only roster row != identity disagreement
-missing provider roster row != player absence
 name equality != identity proof
 name inequality != identity break
 classification/program membership != player identity
 shared provider ID != PIT safety
 ```
 
-## C3 freeze candidate criteria
+## Exit
 
-C3 can freeze after C3-B if:
+All C3-B freeze-candidate criteria were satisfied:
 
-1. the broader FBS sample continues to show a dominant exact shared athlete-ID namespace;
-2. no unexplained provider-ID collision appears;
-3. provider-only roster rows are explicitly modeled as coverage differences;
-4. any zero-team-coverage slice is retained as a source coverage gap, not a player absence claim;
-5. the C3-A transfer cases remain valid direct identity evidence;
-6. the Phase C contract keeps canonical `PLAYER_ID` independent from provider IDs.
+1. the broader FBS sample retained a dominant exact shared athlete-ID namespace;
+2. no unexplained provider-ID collision appeared;
+3. provider-only rows remain explicit source coverage differences;
+4. zero-team coverage remains an explicit state where present in other strata;
+5. C3-A transfer continuity remains valid direct identifier evidence;
+6. canonical `PLAYER_ID` remains independent from provider IDs.
 
-C3 freeze will be an identity/crosswalk freeze, not a claim that either provider roster is population-complete.
+C3-B is complete and C3 is frozen by `B2C_C3_PLAYER_CROSS_PROVIDER_FREEZE_V1.md`.
