@@ -174,7 +174,7 @@ conference-game flag
 2025  MATCH 933  MISMATCH 1
 ```
 
-Venue-name examples demonstrate sponsor/branding/history drift, so display text is not venue identity. Neutral-site disagreements remain provider observations. Conference-game flag mismatches concentrate in special semantic contexts such as championship and independent/Army-Navy cases and remain distinct from conference affiliation.
+Venue-name examples demonstrate sponsor/branding/history drift, so display text is not venue identity. Neutral-site disagreements remain provider observations. Conference-game flag mismatch examples are concentrated in special contexts such as championship and independent/Army-Navy cases, but C5 does not infer an undocumented provider rule from that pattern.
 
 Locked:
 
