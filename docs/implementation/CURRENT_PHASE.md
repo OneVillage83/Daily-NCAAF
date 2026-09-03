@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity, C2 program/team provider crosswalk, C3 player cross-provider identity and C4 transfer-event reconciliation are COMPLETE/FROZEN; C5 venue/conference/context reconciliation is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
+**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity, C2 program/team provider crosswalk, C3 player cross-provider identity and C4 transfer-event reconciliation are COMPLETE/FROZEN; C5 venue/conference/context reconciliation is ACTIVE with C5-A measured/partial and C5-B active.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
 
 ---
 
@@ -154,43 +154,104 @@ transferDate != acquired_at
 
 ## C5 — Venue / conference / context reconciliation — ACTIVE
 
-Plan:
+Governing plan:
 
 ```text
 docs/data/B2C_C5_VENUE_CONFERENCE_CONTEXT_PLAN_V1.md
 ```
 
+### C5-A — native schedule context — MEASURED / PARTIAL
+
+Evidence:
+
+```text
+docs/data/PROVIDER_PROBE_RESULTS_V19.md
+```
+
+User-executed suite:
+
+```text
+11 tests
+OK
+```
+
+Exact-event coverage remained complete from the CFBD side:
+
+```text
+2023  910 / 910
+2024  920 / 920
+2025  934 / 934
+```
+
+Critical source-shape result: the selected `espn_cfb_schedules` CSVs do **not** expose event `venue_id` or participant conference/division columns. V1 therefore returned `UNAVAILABLE` for those fields by design; this is not a mismatch.
+
+Measured native schedule context:
+
+```text
+venue display text
+2023  EXACT 815  MISMATCH 95
+2024  EXACT 830  MISMATCH 90
+2025  EXACT 827  MISMATCH 107
+
+neutral-site flag
+2023  MATCH 907  MISMATCH 3
+2024  MATCH 901  MISMATCH 19
+2025  MATCH 925  MISMATCH 9
+
+conference-game flag
+2023  MATCH 898  MISMATCH 12
+2024  MATCH 909  MISMATCH 11
+2025  MATCH 933  MISMATCH 1
+```
+
+Venue-name differences show sponsor/branding/history drift and do not establish venue identity breaks. Neutral-site differences remain provider observations. Conference-game flag disagreements cluster in special semantic contexts such as conference championships and independent/Army-Navy cases and remain separate from affiliation truth.
+
+Locked:
+
+```text
+field absent from source artifact != disagreement
+UNAVAILABLE != MISMATCH
+venue display text != venue identity
+neutral-site provider flag != canonical truth by default
+conferenceGame != conference_competition semantics by definition
+```
+
+### C5-B — team-season context / home-venue anchor — ACTIVE
+
+Plan:
+
+```text
+docs/data/B2C_C5_CONTEXT_FOLLOWUP_PLAN_V1.md
+```
+
 Tooling:
 
 ```text
-scripts/probes/cross_provider_context_reconciliation_probe.py
-tests/probes/test_cross_provider_context_reconciliation_probe.py
+scripts/probes/cross_provider_context_reconciliation_probe_v2.py
+tests/probes/test_cross_provider_context_reconciliation_probe_v2.py
 ```
 
-Initial completed-season window:
+C5-B uses documented ESPN-native fields from the published `espn_cfb_teams` season table to evaluate participant division and conference. The published table also carries explicitly backported CFBD fields; those are excluded from second-path evidence.
+
+C5-B compares:
 
 ```text
-2023
-2024
-2025
+CFBD participant classification
+vs ESPN-native team-season division
+
+CFBD participant conference
+vs ESPN-native conference aliases
 ```
 
-C5 compares exact-ID matched games only and applies the frozen C1 participant orientation before comparing participant context.
+For venue IDs, C5-B uses ESPN team-season `venue_id` only as a conservative **home-venue** anchor under non-neutral same-side context. It must never substitute a team home venue for a direct event venue.
 
-Measured fields:
+Locked distinction:
 
 ```text
-venueId <-> venue_id
-venue display text
-neutralSite <-> neutral_site
-home/away classification <-> aligned division
-home/away conference <-> aligned conference
-conferenceGame <-> conference_competition
+HOME_VENUE_STINT != GAME_VENUE_OBSERVATION
+team-season home venue != event venue by definition
+CFBD-backported team fields != ESPN-native evidence
 ```
-
-`conferenceGame` and `conference_competition` are treated as potentially distinct semantics; disagreement is retained as a semantic observation rather than forced into an affiliation identity rule.
-
-Provider venue IDs, conference labels and classification labels remain observations/crosswalk evidence and never become canonical IDs by themselves.
 
 ## C6 — queued after C5
 
