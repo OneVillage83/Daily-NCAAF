@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity, C2 program/team provider crosswalk and C3 player cross-provider identity are COMPLETE/FROZEN; C4 transfer-event reconciliation is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
+**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity, C2 program/team provider crosswalk, C3 player cross-provider identity and C4 transfer-event reconciliation are COMPLETE/FROZEN; C5 venue/conference/context reconciliation is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
 
 ---
 
@@ -12,19 +12,7 @@ Provider registry, source coverage matrix, PIT availability matrix, canonical id
 
 ## B.2-A — CFBD games/PBP — CORE COMPLETE
 
-Locked findings include:
-
-- sampled game IDs and play IDs were unique;
-- sampled `wallclock` is absent through 2017 and generally available-but-nullable from 2018 forward;
-- provider `wallclock` is not publication time and never replaces Daily-NCAAF `acquired_at`;
-- PPA nullness is play-family dependent;
-- `classification=fbs` is an FBS-involved universe including FBS-vs-FCS games;
-- Liberty-at-App-State 2024 is a real cancellation;
-- current-season responses change across acquisitions, requiring immutable observations.
-
-Prospective correction/revision timing remains B.2-D.
-
----
+Locked findings include unique sampled game/play IDs, historical `wallclock` coverage boundaries, FBS-involved query semantics, structural PPA nullness, the real Liberty-at-App-State cancellation and current-season revision behavior. Prospective correction/revision timing remains B.2-D.
 
 ## B.2-B — CFBD college-native family / identity audit — COMPLETE
 
@@ -40,11 +28,17 @@ NO TALENT ROW != ZERO TALENT
 HTTP 429 != missing data
 ```
 
-Stable CFBD player IDs survived same-program seasons, multiple transfers and FCS->FBS movement in selected cases. Recruiting linkage remains incomplete and name-only repair is unsafe.
-
 ---
 
-# B.2-C — CFBD <-> ESPN/cfbfastR reconciliation — ACTIVE
+# B.2-C — Reconciliation Audit — ACTIVE
+
+## Governing provenance addendum
+
+```text
+docs/data/B2C_PROVIDER_PROVENANCE_ADDENDUM_V1.md
+```
+
+Current SportsDataverse build documentation states that the CFBD `/games` path is ESPN-origin data redistributed through CFBD, while `espn_cfb_schedules` is ESPN-native. Therefore C1-C5 evidence is described as delivery-path/provider compatibility and coverage reconciliation, **not independent-source corroboration**.
 
 ## C1 — Game / event reconciliation — COMPLETE / FROZEN
 
@@ -54,11 +48,7 @@ Freeze:
 docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md
 ```
 
-Completed 2024 established 920/920 normalized FBS event overlap, zero unresolved/ambiguous orientations, zero score mismatches and zero team-ID crosswalk conflicts.
-
-Provider home/away side is not canonical identity. Kickoff differences remain temporal-semantics evidence, not identity failures.
-
----
+Completed 2024 established 920/920 normalized FBS event overlap, zero unresolved/ambiguous orientations, zero score mismatches and zero team-ID crosswalk conflicts. Provider home/away side is not canonical identity. Kickoff differences remain temporal-semantics evidence.
 
 ## C2 — Program / team provider crosswalk — COMPLETE / FROZEN
 
@@ -78,81 +68,12 @@ Completed 2023-2025:
 
 No measured cross-season ID collision occurred. External provider team ID remains separate from canonical `PROGRAM_ID`.
 
----
-
 ## C3 — Player cross-provider identity — COMPLETE / FROZEN
 
 Freeze:
 
 ```text
 docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_FREEZE_V1.md
-```
-
-Evidence:
-
-```text
-docs/data/PROVIDER_PROBE_RESULTS_V16.md
-docs/data/PROVIDER_PROBE_RESULTS_V17.md
-```
-
-### C3-A targeted continuity
-
-```text
-Jalen Milroe 4432734
-  Alabama 2023/2024: direct shared provider ID
-
-Dillon Gabriel 4427238
-  Oklahoma 2022/2023 -> Oregon 2024: direct shared provider ID throughout
-
-Caleb Downs 4870706
-  Alabama 2023 -> Ohio State 2024/2025: direct shared provider ID throughout
-
-Travis Hunter 4685415
-  Jackson State 2022: CFBD-only under zero ESPN team-row coverage
-  Colorado 2023/2024: direct shared provider ID
-```
-
-### C3-A nine FBS slices
-
-```text
-CFBD athlete-ID observations       1111
-ESPN athlete-ID observations       1111
-shared                             1099
-weighted overlap                 98.92% / 98.92%
-duplicate-ID slices                  0
-```
-
-### C3-B deterministic 13-slice breadth pass
-
-User-executed suite:
-
-```text
-10 tests
-OK
-```
-
-Aggregate:
-
-```text
-CFBD athlete-ID observations       1634
-ESPN athlete-ID observations       1638
-shared                             1616
-CFBD-only                            18
-ESPN-only                            22
-weighted CFBD overlap            98.8984%
-weighted ESPN overlap            98.6569%
-minimum CFBD slice overlap       94.1606%
-minimum ESPN slice overlap       88.6179%
-zero-team-row slices                 0
-duplicate-ID slices                  0
-```
-
-Coverage states:
-
-```text
-COMPLETE_EXACT_ID_SET_MATCH  4
-HIGH_EXACT_ID_OVERLAP        7
-PARTIAL_EXACT_ID_OVERLAP     2
 ```
 
 Across C3-A + C3-B's 22 FBS slices:
@@ -165,8 +86,6 @@ combined weighted CFBD overlap   98.9071%
 combined weighted ESPN overlap   98.7632%
 ```
 
-These are observation counts across slices, not globally unique persons.
-
 Frozen:
 
 ```text
@@ -176,55 +95,110 @@ provider-only roster row != identity disagreement
 provider roster membership != canonical PLAYER_PROGRAM_STINT truth
 missing provider row != player absence
 name inequality != identity break
-shared cross-provider ID != historical PIT safety
 ```
 
----
+## C4 — Transfer-event reconciliation — COMPLETE / FROZEN
 
-## C4 — Transfer-event reconciliation — ACTIVE
+Freeze:
+
+```text
+docs/data/B2C_C4_TRANSFER_EVENT_RECONCILIATION_FREEZE_V1.md
+```
+
+Evidence:
+
+```text
+docs/data/PROVIDER_PROBE_RESULTS_V18.md
+```
+
+User-executed suite:
+
+```text
+10 tests
+OK
+```
+
+Final transfer-event states:
+
+```text
+TWO_SIDED_DIRECT_SHARED_ID_BRACKET  3
+PARTIAL_DIRECT_SHARED_ID_BRACKET    1
+PORTAL_CONTEXT_AMBIGUOUS            0
+PORTAL_CONTEXT_NOT_FOUND            0
+IDENTIFIER_CONFLICT                 0
+UNRESOLVED                          0
+```
+
+All four targeted portal rows had exactly one contextual candidate and matching provider `transferDate` observations.
+
+Cases:
+
+```text
+Dillon Gabriel  UCF 2021 -> Oklahoma 2022       TWO_SIDED_DIRECT_SHARED_ID_BRACKET
+Dillon Gabriel  Oklahoma 2023 -> Oregon 2024    TWO_SIDED_DIRECT_SHARED_ID_BRACKET
+Caleb Downs     Alabama 2023 -> Ohio State 2024 TWO_SIDED_DIRECT_SHARED_ID_BRACKET
+Travis Hunter   Jackson State 2022 -> Colorado 2023 PARTIAL_DIRECT_SHARED_ID_BRACKET
+```
+
+Hunter remains partial because the ESPN-derived 2022 roster exposes zero Jackson State rows. That source gap is not repaired by name and is not an identity conflict.
+
+Frozen:
+
+```text
+portal row != PLAYER identity
+portal origin/destination != canonical PLAYER_PROGRAM_STINT by itself
+partial bracket != identity conflict
+transferDate != publication time
+transferDate != acquired_at
+```
+
+## C5 — Venue / conference / context reconciliation — ACTIVE
 
 Plan:
 
 ```text
-docs/data/B2C_C4_TRANSFER_EVENT_RECONCILIATION_PLAN_V1.md
+docs/data/B2C_C5_VENUE_CONFERENCE_CONTEXT_PLAN_V1.md
 ```
 
 Tooling:
 
 ```text
-scripts/probes/cross_provider_transfer_event_probe.py
-tests/probes/test_cross_provider_transfer_event_probe.py
+scripts/probes/cross_provider_context_reconciliation_probe.py
+tests/probes/test_cross_provider_context_reconciliation_probe.py
 ```
 
-Initial transfer events:
+Initial completed-season window:
 
 ```text
-Dillon Gabriel  UCF 2021 -> Oklahoma 2022
-Dillon Gabriel  Oklahoma 2023 -> Oregon 2024
-Travis Hunter   Jackson State 2022 -> Colorado 2023
-Caleb Downs     Alabama 2023 -> Ohio State 2024
+2023
+2024
+2025
 ```
 
-C4 treats CFBD portal rows as contextual transfer observations because the measured portal schema does not expose a direct athlete ID. Frozen C3 athlete IDs bracket the surrounding pre/post roster stints.
+C5 compares exact-ID matched games only and applies the frozen C1 participant orientation before comparing participant context.
 
-Required distinction:
+Measured fields:
 
 ```text
-portal row != player identity
-transferDate != publication time
-portal origin/destination != canonical PLAYER_PROGRAM_STINT by itself
+venueId <-> venue_id
+venue display text
+neutralSite <-> neutral_site
+home/away classification <-> aligned division
+home/away conference <-> aligned conference
+conferenceGame <-> conference_competition
 ```
 
----
+`conferenceGame` and `conference_competition` are treated as potentially distinct semantics; disagreement is retained as a semantic observation rather than forced into an affiliation identity rule.
 
-## C5-C6 — queued after C4
+Provider venue IDs, conference labels and classification labels remain observations/crosswalk evidence and never become canonical IDs by themselves.
+
+## C6 — queued after C5
 
 ```text
-C5 venue/conference/context agreement
 C6 selected play-level reconciliation
 ```
 
-Cross-provider matching never makes a historical source PIT-safe by itself.
+Cross-delivery matching never makes a historical source PIT-safe by itself.
 
 ---
 
@@ -255,8 +229,8 @@ Production canonical schema remains blocked until:
 1. major F-0 through F-14 source families have empirical coverage evidence where access permits;
 2. inaccessible/commercial families are explicitly trial/credential-gated;
 3. major PIT/revision semantics have validated classifications or conservative exclusions;
-4. representative cross-provider game/program/player reconciliation supports provider-independent identity contracts;
+4. representative game/program/player/context reconciliation supports provider-independent identity contracts;
 5. remaining gaps are explicit rather than assumed away;
-6. no schema assumes a provider field is complete, unique, canonical or PIT-safe without evidence.
+6. no schema assumes a provider field is complete, unique, canonical, independent, or PIT-safe without evidence.
 
 Production backfill, feature engineering, training, simulation and Recommendation Gate implementation remain intentionally blocked until this gate is met.
