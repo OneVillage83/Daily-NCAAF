@@ -1,50 +1,19 @@
 # B.2-C C3 — Player Cross-Provider Identity Plan V1
 
-Status: **C3-A COMPLETE; C3-B ACTIVE**
+Status: **COMPLETE / FROZEN**
 
 Prerequisites:
 
-- C1 game/event identity — frozen
-- C2 program/team provider crosswalk — frozen
+- C1 game/event identity — COMPLETE/FROZEN
+- C2 program/team provider crosswalk — COMPLETE/FROZEN
 
 ## Objective
 
-Determine whether CFBD roster athlete identifiers and ESPN-derived SportsDataverse roster athlete identifiers provide strong direct cross-provider player identity evidence, including across transfers and an FCS→FBS movement, without using names as identity keys.
+Determine whether CFBD roster athlete identifiers and ESPN-derived SportsDataverse roster athlete identifiers provide strong direct cross-provider player identity evidence, including across transfers, without using names as identity keys.
 
-C3 must answer:
+## C3-A targeted identity — COMPLETE
 
-1. Do CFBD roster athlete IDs equal ESPN `athlete_id` values for the same measured player/team-season observations?
-2. How much exact athlete-ID overlap exists for full roster slices?
-3. Do the same athlete IDs survive program transfers across both providers?
-4. Does the same athlete ID survive an FCS→FBS move across both providers where both sources actually expose the stint?
-5. Are there provider-specific missing roster observations even when identity itself is stable?
-6. Do display-name differences prove name-only matching remains unsafe?
-
-## ESPN-derived source
-
-SportsDataverse publishes `espn_cfb_rosters`, an ESPN-derived season roster compilation with identifier-bearing fields including:
-
-```text
-athlete_id
-athlete_uid
-athlete_guid
-team_id
-full_name / athlete display fields
-```
-
-Every acquired asset retains:
-
-```text
-asset name
-asset updated_at
-advertised digest
-downloaded SHA-256
-acquired_at
-```
-
-## C3-A — COMPLETE
-
-Target continuity cases:
+Targets:
 
 ```text
 Jalen Milroe     4432734
@@ -53,143 +22,127 @@ Travis Hunter    4685415
 Caleb Downs      4870706
 ```
 
-User-executed C3-A suite:
+User-executed suite:
 
 ```text
 11 tests
 OK
 ```
 
-Measured target states:
+Direct shared-ID continuity was observed for Milroe's measured Alabama seasons, Gabriel's Oklahoma->Oregon path, Downs' Alabama->Ohio State path and Hunter's Colorado seasons.
+
+Hunter's 2022 Jackson State stint remained CFBD-only because the ESPN-derived roster asset exposed zero Jackson State rows. That is source coverage missingness, not an athlete-ID disagreement.
+
+Across nine FBS roster slices:
 
 ```text
-Jalen Milroe
-2023 Alabama  DIRECT_SHARED_PROVIDER_ID
-2024 Alabama  DIRECT_SHARED_PROVIDER_ID
-
-Dillon Gabriel
-2022 Oklahoma  DIRECT_SHARED_PROVIDER_ID
-2023 Oklahoma  DIRECT_SHARED_PROVIDER_ID
-2024 Oregon    DIRECT_SHARED_PROVIDER_ID
-
-Caleb Downs
-2023 Alabama     DIRECT_SHARED_PROVIDER_ID
-2024 Ohio State  DIRECT_SHARED_PROVIDER_ID
-2025 Ohio State  DIRECT_SHARED_PROVIDER_ID
-
-Travis Hunter
-2022 Jackson State  CFBD_ONLY_IDENTIFIER
-2023 Colorado       DIRECT_SHARED_PROVIDER_ID
-2024 Colorado       DIRECT_SHARED_PROVIDER_ID
+CFBD athlete-ID observations       1111
+ESPN athlete-ID observations       1111
+shared                             1099
+CFBD-only                            12
+ESPN-only                            12
+weighted overlap                 98.92% / 98.92%
+duplicate-ID slices                  0
 ```
 
-Gabriel and Downs therefore provide direct cross-provider evidence that the same external athlete ID survives FBS program transfers.
-
-Hunter's 2022 Jackson State result is a source coverage gap, not an identifier disagreement: the SportsDataverse 2022 roster asset exposed zero rows for Jackson State team ID `2296`, while CFBD exposed 119 roster rows including Hunter.
-
-Locked:
-
-```text
-ZERO PROVIDER TEAM ROWS != PLAYER ABSENCE
-CFBD_ONLY_IDENTIFIER UNDER ZERO TEAM COVERAGE != IDENTITY CONFLICT
-```
-
-## C3-A surrounding FBS roster evidence
-
-Across nine FBS team-season slices surrounding the targets:
-
-```text
-CFBD unique athlete IDs                  1111
-ESPN unique athlete IDs                  1111
-exact shared athlete IDs                 1099
-CFBD-only athlete IDs                      12
-ESPN-only athlete IDs                      12
-weighted CFBD exact-ID overlap          98.92%
-weighted ESPN exact-ID overlap          98.92%
-```
-
-No measured FBS slice contained duplicate athlete IDs on either provider side.
-
-The same external athlete ID frequently survives display-name differences, including suffix, abbreviation and preferred-name variants. Therefore:
-
-```text
-name inequality != identity break
-provider athlete display text != canonical identity
-```
-
-Detailed evidence:
+Evidence:
 
 ```text
 docs/data/PROVIDER_PROBE_RESULTS_V16.md
 ```
 
-Tooling:
+## C3-B breadth / coverage — COMPLETE
+
+User-executed suite:
 
 ```text
-scripts/probes/cross_provider_player_identity_probe.py
-tests/probes/test_cross_provider_player_identity_probe.py
+10 tests
+OK
 ```
 
-## C3-B — ACTIVE breadth / coverage pass
+The deterministic 13-slice sample covered conference, independent, service-academy, realignment and recent-FBS-entry contexts.
 
-C3-A establishes strong identifier compatibility but does not prove population-complete roster coverage. The initial FBS sample was concentrated around Alabama, Oklahoma, Colorado, Oregon and Ohio State.
-
-C3-B therefore performs the plan's bounded expansion trigger across deterministic structural strata:
+Aggregate:
 
 ```text
-2024 Clemson
-2024 Michigan
-2024 Utah
-2024 Georgia
-2024 Army
-2024 Kennesaw State
-2024 Toledo
-2024 Boise State
-2024 App State
-2024 Oregon State
-2024 Notre Dame
-2025 Delaware
-2025 Missouri State
+CFBD athlete-ID observations       1634
+ESPN athlete-ID observations       1638
+shared                             1616
+CFBD-only                            18
+ESPN-only                            22
+weighted CFBD overlap            98.8984%
+weighted ESPN overlap            98.6569%
+zero-team-row slices                 0
+duplicate-ID slices                  0
 ```
 
-This spans major conferences, Group-of-Five conferences, an independent, a service academy, conference realignment, a recent FBS entrant and the two 2025 FBS entrants measured in C2.
-
-Plan:
+Evidence:
 
 ```text
+docs/data/PROVIDER_PROBE_RESULTS_V17.md
 docs/data/B2C_C3_PLAYER_COVERAGE_BREADTH_PLAN_V1.md
 ```
 
-Tooling:
+## Combined measured FBS evidence
 
 ```text
-scripts/probes/cross_provider_player_coverage_probe.py
-tests/probes/test_cross_provider_player_coverage_probe.py
+team-season slices                        22
+CFBD athlete-ID observations            2745
+ESPN athlete-ID observations            2749
+exact shared athlete-ID observations   2715
+combined weighted CFBD overlap       98.9071%
+combined weighted ESPN overlap       98.7632%
 ```
 
-C3-B measures per-slice and aggregate exact athlete-ID overlap, provider-only IDs, zero-team coverage and duplicate-ID behavior.
+These are observation counts across slices, not globally unique-person counts.
 
-## Safety rules
+## Frozen rules
 
 ```text
 provider athlete ID != canonical PLAYER_ID
+shared external athlete ID = strong provider-crosswalk identity evidence
 name equality != identity proof
 name inequality != identity break
 same player + transfer != new PLAYER
 FCS -> FBS != new PLAYER
 missing provider roster row != player absence
 provider-only roster row != identity disagreement
+provider roster membership != canonical PLAYER_PROGRAM_STINT truth
 shared cross-provider ID != historical PIT safety
 ```
 
-## C3 freeze criteria
+Names may discover or diagnose candidates, but they may never repair a provider-ID conflict.
 
-C3 may freeze only when:
+## Production contract direction
 
-1. targeted continuity cases are resolved with explicit identifier evidence or explicit unresolved/coverage states;
-2. no identifier disagreement is silently repaired by name;
-3. a broader deterministic FBS sample demonstrates a dominant shared identifier namespace without unexplained collisions;
-4. provider-only roster rows remain explicit coverage differences;
-5. transfer continuity is separated from program-stint state;
-6. remaining FCS/source coverage gaps are explicit rather than interpreted as player absence;
-7. canonical Daily-NCAAF `PLAYER_ID` remains independent from provider IDs.
+```text
+PLAYER
+  canonical player_id
+
+PLAYER_PROVIDER_CROSSWALK
+  player_id
+  provider
+  provider_athlete_id
+  reconciliation_method
+  evidence/provenance
+  observed_at / acquired_at
+  confidence
+
+PLAYER_PROGRAM_STINT
+  canonical player_id
+  canonical program_id
+  stint interval / season state
+  evidence/provenance
+```
+
+The provider athlete ID never becomes the canonical Daily-NCAAF `PLAYER_ID`.
+
+## Freeze contract
+
+```text
+docs/data/B2C_C3_PLAYER_CROSS_PROVIDER_FREEZE_V1.md
+```
+
+## Exit
+
+C3 is complete/frozen. C4 is the next reconciliation gate and will evaluate identifier-less transfer portal observations against the frozen player/program identities and surrounding roster-stint evidence.
