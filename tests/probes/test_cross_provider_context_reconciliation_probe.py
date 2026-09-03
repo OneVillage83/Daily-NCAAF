@@ -184,7 +184,10 @@ class CrossProviderContextReconciliationProbeTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             report = probe.build_report(seasons=[2024], request_delay_seconds=0)
         self.assertEqual(report["status"], "SKIPPED_NO_API_KEY")
-        self.assertNotIn("CFBD_API_KEY", str(report.get("secret_policy", "")).split("=")[-1])
+        self.assertEqual(
+            report["secret_policy"],
+            "CFBD_API_KEY is read from the environment only and never emitted",
+        )
 
 
 if __name__ == "__main__":
