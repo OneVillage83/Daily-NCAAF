@@ -1,6 +1,6 @@
 # B.2-C C4 — Transfer-Event Reconciliation Plan V1
 
-Status: **ACTIVE**
+Status: **COMPLETE / FROZEN**
 
 Prerequisites:
 
@@ -48,64 +48,12 @@ portal name != identity key
 
 ## Target transfer events
 
-### Dillon Gabriel — UCF -> Oklahoma
-
 ```text
-portal season: 2022
-expected athlete id: 4427238
-origin roster: UCF 2021
-next roster: Oklahoma 2022
-measured transferDate: 2021-11-27T07:07:00.000Z
+Dillon Gabriel  UCF 2021 -> Oklahoma 2022
+Dillon Gabriel  Oklahoma 2023 -> Oregon 2024
+Travis Hunter   Jackson State 2022 -> Colorado 2023
+Caleb Downs     Alabama 2023 -> Ohio State 2024
 ```
-
-### Dillon Gabriel — Oklahoma -> Oregon
-
-```text
-portal season: 2024
-expected athlete id: 4427238
-origin roster: Oklahoma 2023
-next roster: Oregon 2024
-measured transferDate: 2023-12-04T14:01:00.000Z
-```
-
-### Travis Hunter — Jackson State -> Colorado
-
-```text
-portal season: 2023
-expected athlete id: 4685415
-origin roster: Jackson State 2022 (FCS)
-next roster: Colorado 2023
-measured transferDate: 2022-12-19T04:36:00.000Z
-```
-
-The ESPN-derived Jackson State 2022 roster is already known to be absent. C4 must preserve this as a coverage state rather than treating the origin player as missing.
-
-### Caleb Downs — Alabama -> Ohio State
-
-```text
-portal season: 2024
-expected athlete id: 4870706
-origin roster: Alabama 2023
-next roster: Ohio State 2024
-measured transferDate: 2024-01-17T15:39:00.000Z
-```
-
-## Inputs
-
-CFBD:
-
-```text
-GET /player/portal?year=<portal season>
-GET /roster?year=<season>&team=<program>&classification=<fbs|fcs>
-```
-
-SportsDataverse / ESPN-derived:
-
-```text
-espn_cfb_rosters season assets
-```
-
-C2 external program/team IDs and C3 athlete-ID crosswalk semantics are prerequisites.
 
 ## Matching hierarchy
 
@@ -118,23 +66,7 @@ normalized player name
 + portal season
 ```
 
-This does **not** establish canonical identity.
-
-The player identity bracket comes from the expected athlete ID in surrounding roster observations.
-
-## Required surrounding-stint states
-
-For each origin and destination roster observation:
-
-```text
-DIRECT_SHARED_PROVIDER_ID
-CFBD_ONLY_IDENTIFIER
-ESPN_ONLY_IDENTIFIER
-IDENTIFIER_DISAGREEMENT
-UNRESOLVED
-NO_ESPN_TEAM_ROWS
-NO_CFBD_TEAM_ROWS
-```
+This does **not** establish canonical identity. The player identity bracket comes from the expected athlete ID in surrounding roster observations.
 
 ## Transfer-event reconciliation states
 
@@ -148,7 +80,35 @@ IDENTIFIER_CONFLICT
 UNRESOLVED
 ```
 
-A two-sided bracket means the same expected external athlete ID is observed on both pre- and post-transfer program stints. It does not mean the portal row itself contains that ID.
+## User-executed completion evidence
+
+```text
+unit tests: 10
+result: OK
+portal target events: 4
+unique portal candidate per event: 4 / 4
+portal transferDate MATCH: 4 / 4
+```
+
+Final reconciliation states:
+
+```text
+TWO_SIDED_DIRECT_SHARED_ID_BRACKET  3
+PARTIAL_DIRECT_SHARED_ID_BRACKET    1
+PORTAL_CONTEXT_AMBIGUOUS            0
+PORTAL_CONTEXT_NOT_FOUND            0
+IDENTIFIER_CONFLICT                 0
+UNRESOLVED                          0
+```
+
+The three all-FBS cases bracketed the same direct shared athlete ID on both sides. Travis Hunter remained intentionally partial because SportsDataverse exposes zero Jackson State 2022 roster rows while CFBD directly exposes athlete ID `4685415` there and both paths expose the same ID at Colorado in 2023.
+
+Detailed evidence:
+
+```text
+docs/data/PROVIDER_PROBE_RESULTS_V18.md
+docs/data/B2C_C4_TRANSFER_EVENT_RECONCILIATION_FREEZE_V1.md
+```
 
 ## Portal observation contract
 
@@ -175,7 +135,7 @@ TRANSFER_OBSERVATION
 
 The canonical `PLAYER_PROGRAM_STINT` remains separate from the transfer observation.
 
-## Safety rules
+## Frozen safety rules
 
 ```text
 portal name match != player identity
@@ -184,16 +144,10 @@ transferDate != publication time
 transferDate != acquired_at
 same external athlete ID across programs != new PLAYER
 missing ESPN origin roster != transfer failure
+partial bracket != identity conflict
 provider-only row != identity conflict
 ```
 
-## C4 freeze candidate criteria
+## Exit
 
-C4 can freeze if:
-
-1. measured FBS transfer cases are bracketed by the same athlete ID before/after without identifier conflicts;
-2. portal context agrees with the measured origin/destination transition or any disagreement is explicit;
-3. Hunter's FCS-origin coverage gap remains explicit rather than repaired by name;
-4. ambiguous/missing portal contexts remain unresolved instead of auto-linked;
-5. the production transfer observation contract separates portal evidence, player identity and program stints;
-6. portal timestamps remain temporal observations and are not treated as publication/PIT timestamps.
+All predeclared C4 freeze criteria are satisfied. C4 is COMPLETE/FROZEN and B.2-C advances to C5 venue/conference/context reconciliation.
