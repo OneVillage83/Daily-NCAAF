@@ -101,7 +101,10 @@ class CrossProviderContextReconciliationProbeV4Tests(unittest.TestCase):
                 "home_venue_anchor": {"state": "MATCH"},
             },
         ]
-        summary = probe.summarize_with_signatures(rows)
+        # Reproduce the live build_report monkey-patch shape. The summarizer must
+        # call the preserved V2 base function rather than recurse through v2.summarize.
+        with patch.object(probe.v2, "summarize", probe.summarize_with_signatures):
+            summary = probe.summarize_with_signatures(rows)
         self.assertEqual(summary["conference_mismatch_total"], 2)
         self.assertEqual(summary["conference_mismatch_unclassified_count"], 0)
         self.assertEqual(
