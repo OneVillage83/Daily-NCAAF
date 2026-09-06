@@ -39,6 +39,7 @@ if str(PROBE_DIR) not in sys.path:
 
 import cross_provider_context_reconciliation_probe_v2 as v2
 import cross_provider_context_reconciliation_probe_v3 as v3
+import cross_provider_game_reconciliation_probe_v2 as game_v2
 
 CONTRACT_VERSION = "DAILY_NCAAF_PHASE_B2C_CONTEXT_RECONCILIATION_V4"
 DEFAULT_SEASONS = v3.DEFAULT_SEASONS
@@ -98,8 +99,12 @@ def residual_mismatch_class(
 ) -> str:
     """Classify only measured residual patterns; unknowns remain explicit."""
     left = v2.normalize_conference(cfbd_conference)
-    right = {v2.normalize_conference(value) for value in espn_aliases if value not in (None, "")}
-    conference_id = v2.normalize_id(espn_conference_id)
+    right = {
+        v2.normalize_conference(value)
+        for value in espn_aliases
+        if value not in (None, "")
+    }
+    conference_id = game_v2.normalize_id(espn_conference_id)
 
     if conference_id == "179" and left in {
         "bigsouthovc",
@@ -167,10 +172,14 @@ def compact_summary(report: dict[str, Any]) -> dict[str, Any]:
         signatures = context.get("conference_mismatch_signature_counts") or {}
         total_classes.update({str(k): int(v) for k, v in classes.items()})
         total_signatures.update({str(k): int(v) for k, v in signatures.items()})
-        total_unclassified += int(context.get("conference_mismatch_unclassified_count") or 0)
+        total_unclassified += int(
+            context.get("conference_mismatch_unclassified_count") or 0
+        )
         seasons[str(season)] = {
             "status": result.get("status"),
-            "exact_id_matches": (result.get("id_reconciliation") or {}).get("exact_id_matches"),
+            "exact_id_matches": (result.get("id_reconciliation") or {}).get(
+                "exact_id_matches"
+            ),
             "cfbd_exact_id_coverage_rate": (result.get("id_reconciliation") or {}).get(
                 "cfbd_exact_id_coverage_rate"
             ),
@@ -178,8 +187,12 @@ def compact_summary(report: dict[str, Any]) -> dict[str, Any]:
                 result.get("espn_team_season_metadata") or {}
             ).get("missing_referenced_team_metadata_count"),
             "side_orientation": counts.get("side_orientation", {}),
-            "home_external_team_id_state": counts.get("home_external_team_id_state", {}),
-            "away_external_team_id_state": counts.get("away_external_team_id_state", {}),
+            "home_external_team_id_state": counts.get(
+                "home_external_team_id_state", {}
+            ),
+            "away_external_team_id_state": counts.get(
+                "away_external_team_id_state", {}
+            ),
             "home_division_state": counts.get("home_division_state", {}),
             "away_division_state": counts.get("away_division_state", {}),
             "home_conference_state": counts.get("home_conference_state", {}),
@@ -197,7 +210,9 @@ def compact_summary(report: dict[str, Any]) -> dict[str, Any]:
         "seasons": seasons,
         "aggregate": {
             "conference_mismatch_class_counts": dict(sorted(total_classes.items())),
-            "conference_mismatch_signature_counts": dict(sorted(total_signatures.items())),
+            "conference_mismatch_signature_counts": dict(
+                sorted(total_signatures.items())
+            ),
             "conference_mismatch_unclassified_count": total_unclassified,
         },
         "freeze_gate": (
@@ -233,7 +248,11 @@ def build_report(
     report["conference_semantic_alias_policy"] = {
         "mode": "EXPLICIT_ENUMERATED_EQUIVALENCE_ONLY",
         "equivalence_groups": {
-            "american_athletic": ["American Athletic", "American Conference", "American"],
+            "american_athletic": [
+                "American Athletic",
+                "American Conference",
+                "American",
+            ],
             "coastal_athletic_association": [
                 "Coastal Athletic",
                 "Coastal Athletic Association",
@@ -266,7 +285,9 @@ def main() -> int:
     parser.add_argument(
         "--request-delay-seconds", type=float, default=DEFAULT_REQUEST_DELAY_SECONDS
     )
-    parser.add_argument("--max-429-retries", type=int, default=DEFAULT_MAX_429_RETRIES)
+    parser.add_argument(
+        "--max-429-retries", type=int, default=DEFAULT_MAX_429_RETRIES
+    )
     args = parser.parse_args()
 
     report = build_report(
@@ -276,8 +297,16 @@ def main() -> int:
     )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps(report.get("compact_summary", compact_summary(report)), indent=2, sort_keys=True))
+        args.output.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+    print(
+        json.dumps(
+            report.get("compact_summary", compact_summary(report)),
+            indent=2,
+            sort_keys=True,
+        )
+    )
     return 0
 
 
