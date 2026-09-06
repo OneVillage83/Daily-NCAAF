@@ -46,6 +46,11 @@ DEFAULT_SEASONS = v3.DEFAULT_SEASONS
 DEFAULT_REQUEST_DELAY_SECONDS = v3.DEFAULT_REQUEST_DELAY_SECONDS
 DEFAULT_MAX_429_RETRIES = v3.DEFAULT_MAX_429_RETRIES
 
+# Preserve the underlying V2 summarizer before build_report() monkey-patches the
+# module global. summarize_with_signatures() must call this stable base function,
+# not the live v2.summarize attribute, or it recurses into itself.
+BASE_V2_SUMMARIZE = v2.summarize
+
 # Explicit, evidence-backed naming equivalence only. This is not a fuzzy matcher.
 CONFERENCE_SEMANTIC_EQUIVALENCE: dict[str, str] = {
     **v3.CONFERENCE_SEMANTIC_EQUIVALENCE,
@@ -129,7 +134,7 @@ def mismatch_signature(side: dict[str, Any]) -> str:
 
 
 def summarize_with_signatures(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    base = v2.summarize(rows)
+    base = BASE_V2_SUMMARIZE(rows)
     signature_counts: Counter[str] = Counter()
     class_counts: Counter[str] = Counter()
     signature_classes: dict[str, str] = {}
