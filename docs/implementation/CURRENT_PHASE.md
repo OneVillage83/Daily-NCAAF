@@ -1,6 +1,6 @@
 # Daily NCAAF — Current Phase
 
-**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity, C2 program/team provider crosswalk, C3 player cross-provider identity and C4 transfer-event reconciliation are COMPLETE/FROZEN; C5 venue/conference/context reconciliation is ACTIVE with C5-A measured/partial and C5-B active.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
+**Current status:** Architecture V1 complete. B.1 complete. B.2-A core complete. B.2-B complete. **B.2-C is active: C1 game/event identity, C2 program/team provider crosswalk, C3 player cross-provider identity, C4 transfer-event reconciliation and C5 venue/conference/context reconciliation are COMPLETE/FROZEN; C6 selected play-level reconciliation is ACTIVE.** Phase C production canonical-schema implementation remains intentionally blocked pending the remaining Phase B evidence gates.
 
 ---
 
@@ -38,7 +38,7 @@ HTTP 429 != missing data
 docs/data/B2C_PROVIDER_PROVENANCE_ADDENDUM_V1.md
 ```
 
-Current SportsDataverse build documentation states that the CFBD `/games` path is ESPN-origin data redistributed through CFBD, while `espn_cfb_schedules` is ESPN-native. Therefore C1-C5 evidence is described as delivery-path/provider compatibility and coverage reconciliation, **not independent-source corroboration**.
+Current SportsDataverse build documentation states that the CFBD `/games` path is ESPN-origin data redistributed through CFBD, while ESPN-native delivery paths are also available directly. B.2-C evidence is therefore described as delivery-path/provider compatibility and reconciliation evidence, **not independent-source corroboration**.
 
 ## C1 — Game / event reconciliation — COMPLETE / FROZEN
 
@@ -48,7 +48,15 @@ Freeze:
 docs/data/B2C_C1_GAME_EVENT_IDENTITY_FREEZE_V1.md
 ```
 
-Completed 2024 established 920/920 normalized FBS event overlap, zero unresolved/ambiguous orientations, zero score mismatches and zero team-ID crosswalk conflicts. Provider home/away side is not canonical identity. Kickoff differences remain temporal-semantics evidence.
+Completed 2024 established 920/920 normalized FBS event overlap, zero unresolved/ambiguous orientations, zero score mismatches and zero team-ID crosswalk conflicts.
+
+Frozen:
+
+```text
+provider home/away side != canonical participant identity
+scores are compared only after participant alignment
+kickoff semantics remain separate from identity
+```
 
 ## C2 — Program / team provider crosswalk — COMPLETE / FROZEN
 
@@ -105,20 +113,7 @@ Freeze:
 docs/data/B2C_C4_TRANSFER_EVENT_RECONCILIATION_FREEZE_V1.md
 ```
 
-Evidence:
-
-```text
-docs/data/PROVIDER_PROBE_RESULTS_V18.md
-```
-
-User-executed suite:
-
-```text
-10 tests
-OK
-```
-
-Final transfer-event states:
+Final states:
 
 ```text
 TWO_SIDED_DIRECT_SHARED_ID_BRACKET  3
@@ -128,19 +123,6 @@ PORTAL_CONTEXT_NOT_FOUND            0
 IDENTIFIER_CONFLICT                 0
 UNRESOLVED                          0
 ```
-
-All four targeted portal rows had exactly one contextual candidate and matching provider `transferDate` observations.
-
-Cases:
-
-```text
-Dillon Gabriel  UCF 2021 -> Oklahoma 2022       TWO_SIDED_DIRECT_SHARED_ID_BRACKET
-Dillon Gabriel  Oklahoma 2023 -> Oregon 2024    TWO_SIDED_DIRECT_SHARED_ID_BRACKET
-Caleb Downs     Alabama 2023 -> Ohio State 2024 TWO_SIDED_DIRECT_SHARED_ID_BRACKET
-Travis Hunter   Jackson State 2022 -> Colorado 2023 PARTIAL_DIRECT_SHARED_ID_BRACKET
-```
-
-Hunter remains partial because the ESPN-derived 2022 roster exposes zero Jackson State rows. That source gap is not repaired by name and is not an identity conflict.
 
 Frozen:
 
@@ -152,112 +134,124 @@ transferDate != publication time
 transferDate != acquired_at
 ```
 
-## C5 — Venue / conference / context reconciliation — ACTIVE
+## C5 — Venue / conference / context reconciliation — COMPLETE / FROZEN
 
-Governing plan:
+Freeze:
 
 ```text
-docs/data/B2C_C5_VENUE_CONFERENCE_CONTEXT_PLAN_V1.md
+docs/data/B2C_C5_VENUE_CONFERENCE_CONTEXT_FREEZE_V1.md
 ```
 
-### C5-A — native schedule context — MEASURED / PARTIAL
-
-Evidence:
+Final evidence:
 
 ```text
 docs/data/PROVIDER_PROBE_RESULTS_V19.md
+docs/data/PROVIDER_PROBE_RESULTS_V20.md
+docs/data/PROVIDER_PROBE_RESULTS_V21.md
+docs/data/PROVIDER_PROBE_RESULTS_V22.md
 ```
 
-User-executed suite:
+C5-A proved the selected ESPN-native schedule assets do not expose direct event `venue_id` or participant conference/division columns. Missing fields remained `UNAVAILABLE`, not mismatches.
+
+C5-B used ESPN-native team-season metadata and measured complete participant team-ID and division agreement across completed 2023-2025, with no referenced team metadata gaps. It also demonstrated that team-season home-venue metadata is not safe event-venue truth.
+
+C5-C/V3 retained explicit provider naming equivalence for the American Athletic family without introducing fuzzy matching.
+
+C5-D/V4 completed the exhaustive residual classification. The corrected user-executed suite passed:
 
 ```text
-11 tests
+10 tests
 OK
 ```
 
-Exact-event coverage remained complete from the CFBD side:
+Final residual conference classes:
 
 ```text
-2023  910 / 910
-2024  920 / 920
-2025  934 / 934
+CONFERENCE_ASSOCIATION_MODEL_DIFFERENCE       37
+TEMPORAL_AFFILIATION_CONFLICT_CANDIDATE        1
+UNCLASSIFIED                                    0
 ```
 
-Critical source-shape result: the selected `espn_cfb_schedules` CSVs do **not** expose event `venue_id` or participant conference/division columns. V1 therefore returned `UNAVAILABLE` for those fields by design; this is not a mismatch.
-
-Measured native schedule context:
+Exact signatures:
 
 ```text
-venue display text
-2023  EXACT 815  MISMATCH 95
-2024  EXACT 830  MISMATCH 90
-2025  EXACT 827  MISMATCH 107
-
-neutral-site flag
-2023  MATCH 907  MISMATCH 3
-2024  MATCH 901  MISMATCH 19
-2025  MATCH 925  MISMATCH 9
-
-conference-game flag
-2023  MATCH 898  MISMATCH 12
-2024  MATCH 909  MISMATCH 11
-2025  MATCH 933  MISMATCH 1
+Big South       vs ESPN OVC umbrella   1
+Big South-OVC   vs ESPN OVC umbrella  22
+OVC-Big South   vs ESPN OVC umbrella  14
+UAC             vs ESPN Southland      1
 ```
 
-Venue-name differences show sponsor/branding/history drift and do not establish venue identity breaks. Neutral-site differences remain provider observations. Conference-game flag disagreements are retained as special-context semantic observations rather than converted into an undocumented rule.
-
-Locked:
+C5 freeze gate:
 
 ```text
-field absent from source artifact != disagreement
-UNAVAILABLE != MISMATCH
+external team-ID conflicts             0
+division conflicts                     0
+missing referenced team metadata       0
+unclassified conference residuals      0
+```
+
+Frozen:
+
+```text
+FIELD ABSENT != MISMATCH
+UNAVAILABLE != CONTRADICTORY DATA
+provider display label != canonical identity
 venue display text != venue identity
-neutral-site provider flag != canonical truth by default
+TEAM_SEASON_HOME_VENUE_OBSERVATION != GAME_VENUE_OBSERVATION
+HOME_VENUE_STINT != GAME_VENUE_OBSERVATION
+provider neutral-site flag != canonical truth by default
 conferenceGame != conference_competition semantics by definition
+CONFERENCE ASSOCIATION != MEMBER CONFERENCE
+TEAM-SEASON CONFERENCE METADATA != guaranteed historical affiliation truth
+provider conference ID != canonical CONFERENCE_ID
+provider venue ID != canonical VENUE_ID
 ```
 
-### C5-B — team-season context / home-venue anchor — ACTIVE
+## C6 — Selected play-level reconciliation — ACTIVE
 
 Plan:
 
 ```text
-docs/data/B2C_C5_CONTEXT_FOLLOWUP_PLAN_V1.md
+docs/data/B2C_C6_SELECTED_PLAY_RECONCILIATION_PLAN_V1.md
 ```
 
 Tooling:
 
 ```text
-scripts/probes/cross_provider_context_reconciliation_probe_v2.py
-tests/probes/test_cross_provider_context_reconciliation_probe_v2.py
+scripts/probes/cross_provider_play_reconciliation_probe.py
+tests/probes/test_cross_provider_play_reconciliation_probe.py
 ```
 
-C5-B uses documented ESPN-native fields from the published `espn_cfb_teams` season table to evaluate participant division and conference. The published table also carries explicitly backported CFBD fields; those are excluded from second-path evidence.
-
-C5-B compares:
+Contract:
 
 ```text
-CFBD participant classification
-vs ESPN-native team-season division
-
-CFBD participant conference
-vs ESPN-native conference aliases
+DAILY_NCAAF_PHASE_B2C_SELECTED_PLAY_RECONCILIATION_V1
 ```
 
-For venue IDs, C5-B uses ESPN team-season `venue_id` only as a conservative **home-venue** anchor under non-neutral same-side context. It must never substitute a team home venue for a direct event venue.
+C6-A compares a deterministic set of already-reconciled event IDs across 2023-2025 using CFBD historical `/plays` and ESPN site-v2 summary play-by-play.
 
-Locked distinction:
+The first identity question is exact play-ID compatibility:
 
 ```text
-HOME_VENUE_STINT != GAME_VENUE_OBSERVATION
-team-season home venue != event venue by definition
-CFBD-backported team fields != ESPN-native evidence
+exact PLAY_ID equality before semantic comparison
 ```
 
-## C6 — queued after C5
+Only exact shared play IDs are compared on:
 
 ```text
-C6 selected play-level reconciliation
+period
+clock seconds
+down
+distance
+yards to goal
+scoring flag
+play type text
+play text
 ```
+
+Provider-only play rows remain explicit. C6-A does not force-match by row order, clock or text.
+
+If exact play-ID overlap is insufficient, C6 proceeds to a bounded C6-B composite-alignment study rather than weakening the identity contract.
 
 Cross-delivery matching never makes a historical source PIT-safe by itself.
 
@@ -290,7 +284,7 @@ Production canonical schema remains blocked until:
 1. major F-0 through F-14 source families have empirical coverage evidence where access permits;
 2. inaccessible/commercial families are explicitly trial/credential-gated;
 3. major PIT/revision semantics have validated classifications or conservative exclusions;
-4. representative game/program/player/context reconciliation supports provider-independent identity contracts;
+4. representative game/program/player/context/play reconciliation supports provider-independent identity contracts;
 5. remaining gaps are explicit rather than assumed away;
 6. no schema assumes a provider field is complete, unique, canonical, independent, or PIT-safe without evidence.
 
